@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "migration:create": "node-pg-migrate -m infra/migrations create",
-    "migration:up": "node-pg-migrate -m infra/migrations create --envPath .env.development up",
+    "migration:up": "node-pg-migrate -m infra/migrations --envPath .env.development up",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand"
   },
