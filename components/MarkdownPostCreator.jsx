@@ -13,6 +13,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import ImageUpload from "./ImageUpload";
 
 export function MarkdownPostCreator({ blogId, categories }) {
   const router = useRouter();
@@ -89,11 +90,11 @@ export function MarkdownPostCreator({ blogId, categories }) {
       action: () => insertMarkdownSyntax("`", "`"),
       tooltip: "Código inline",
     },
-    {
-      icon: Image,
-      action: () => insertMarkdownSyntax("![Alt text](", ")"),
-      tooltip: "Inserir Imagem",
-    },
+    // {
+    //   icon: Image,
+    //   action: () => {},
+    //   tooltip: "Inserir Imagem",
+    // },
   ];
 
   function handleInputChange(e) {
@@ -153,6 +154,16 @@ export function MarkdownPostCreator({ blogId, categories }) {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function handleUploadSuccess(url) {
+    console.log("URL da imagem:", url);
+    insertMarkdownSyntax(`![${formData.title}](${url}`, ")");
+  }
+
+  function handleUploadError(error) {
+    console.error("Erro no upload:", error);
+    // Trate o erro como preferir
   }
 
   return (
@@ -238,6 +249,10 @@ export function MarkdownPostCreator({ blogId, categories }) {
               <button.icon size={20} />
             </button>
           ))}
+          <ImageUpload
+            onUploadError={handleUploadError}
+            onUploadSuccess={handleUploadSuccess}
+          />
         </div>
 
         {activeTab === "write" && (

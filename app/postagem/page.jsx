@@ -16,7 +16,7 @@ async function getCategories() {
 
 export default async function CreatePostPage() {
   const categories = await getCategories();
-  const blogId = process.env.NEXT_PUBLIC_BLOG_ID; // Ou obtenha de onde for apropriado
+  const blogId = process.env.NEXT_PUBLIC_BLOG_ID; // Ou obtenha dce onde for apropriado
 
   return (
     <Suspense fallback={<div>Carregando...</div>}>

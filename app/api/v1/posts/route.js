@@ -37,9 +37,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    console.log(body);
 
-    // Aqui você pode adicionar validação dos dados
     const post = await Post.create(body);
 
     return NextResponse.json(post);
