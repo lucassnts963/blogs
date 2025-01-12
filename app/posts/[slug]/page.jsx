@@ -6,6 +6,7 @@ import { remark } from "remark";
 import html from "remark-html";
 
 import Post from "models/post";
+import { formatDate } from "lib/utils";
 
 async function getPost(slug) {
   const post = await Post.findBySlug(slug);
@@ -22,11 +23,7 @@ export default async function NewsDetailPage({ params }) {
   try {
     const post = await getPost(slug);
 
-    const formattedDate = new Date(post.postedAt).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    const formattedDate = formatDate(post.createdAt);
 
     const matterResult = matter(post.content);
 
