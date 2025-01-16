@@ -1,135 +1,140 @@
-import HorizontalNewsCard from "components/HorinzontalNewsCard";
-import { NewsCard } from "components/NewsCard";
+import { HorizontalNewsCard, NewsCard } from "components/NewsCard";
 import { Slide } from "components/Slide";
-import { VerticalNewsCard } from "components/VerticalNewsCard";
+import { extractFirstImagefromMarkdown } from "lib/utils";
+import Post from "models/post";
+import { notFound } from "next/navigation";
 
-const slides = [
-  {
-    title: "Notícia 1",
-    description: "Descrição da primeira notícia",
-    image:
-      "https://www.ograndenews.com.br/arquivos/noticias/20748/palmeiras-x-botafogo-o-jogo-que-pode-decretar-o-rumo-do-brasileirao.png", // Substitua pelo link da imagem
-  },
-  {
-    title: "Notícia 2",
-    description: "Descrição da segunda notícia",
-    image:
-      "https://www.ograndenews.com.br/arquivos/noticias/20717/bulgari-e-cartier-empresario-morto-pelo-pcc-levava-r-1-mi-em-joias.png",
-  },
-  {
-    title: "Notícia 3",
-    description: "Descrição da terceira notícia",
-    image:
-      "https://www.ograndenews.com.br/arquivos/noticias/20756/premio-multishow-veja-os-paraenses-que-ganharam-na-edicao-de-2024.png",
-  },
-];
+async function getNews() {
+  try {
+    const posts = await Post.findAll({
+      blogId: "7848c6a6-ee92-40c6-950e-2700418dba6d",
+    });
 
-const news = [
-  {
-    title: "Eleições de 2024: os principais acontecimentos",
-    category: "Política",
-    image:
-      "https://www.ograndenews.com.br/arquivos/noticias/20753/menino-atingido-por-pedra-de-caminhao-morreu-ao-salvar-primo-de-2-anos.png",
-    link: "/post",
-  },
-  {
-    title: "Descoberta científica revolucionária",
-    category: "Ciência",
-    image:
-      "https://www.ograndenews.com.br/arquivos/noticias/20752/quem-era-casal-de-enfermeiros-achado-morto-em-carro.png",
-    link: "/post",
-  },
-  {
-    title: "Como economizar nas compras de fim de ano",
-    category: "Economia",
-    image:
-      "https://www.ograndenews.com.br/arquivos/noticias/20751/cpi-das-bets-convoca-gusttavo-lima-para-depor-nesta-terca.png",
-    link: "/post",
-  },
-];
+    if (!posts || posts.length === 0) {
+      return [];
+    }
 
-export default function HomePage() {
+    return posts;
+  } catch (error) {
+    console.error("Failed to fetch news:", error);
+    return [];
+  }
+}
+
+// HomePage.jsx
+export default async function HomePage() {
+  const news = await getNews();
+
   return (
-    <main className="container mx-auto p-4">
+    <main className="container mx-auto px-4 py-6">
       {/* PUBLICIDADE */}
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-4">Publicidade</h2>
-        <div className="bg-gray-200 h-32 flex items-center justify-center rounded">
-          <p>Espaço para banners publicitários</p>
+        <div className="bg-gray-200 h-32 md:h-40 flex items-center justify-center rounded-lg shadow-md">
+          <p className="text-gray-600">Espaço para banners publicitários</p>
         </div>
       </section>
 
       {/* DESTAQUES */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Destaques</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-gray-200 h-[600px] rounded flex items-center justify-center">
-            <Slide slides={slides} />
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold mb-6">Destaques</h2>
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="w-full lg:w-2/3">
+            <div className="h-[400px] md:h-[500px] lg:h-[600px] rounded-lg overflow-hidden">
+              <Slide slides={news.slice(0, 3)} />
+            </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-gray-200 h-full rounded grid grid-cols-1 gap-2">
-              {news.map((item, index) => (
-                <NewsCard
-                  key={index}
-                  title={item.title}
-                  category={item.category}
-                  image={item.image}
-                  link={item.link}
-                />
-              ))}
-            </div>
-            <div className="bg-gray-200 h-full rounded">
-              <VerticalNewsCard
-                category="Ciência e Saúde"
-                image="https://www.ograndenews.com.br/arquivos/noticias/20647/azeite-de-oliva-sua-saude-pode-estar-em-risco.png"
-                title="Azeite de Oliva sua saude pode estar em risco"
-                link="/post"
-              />
-            </div>
+
+          <div className="w-full lg:w-1/3">
+            <div className="flex flex-col gap-6">{buildDestaques(news)}</div>
           </div>
         </div>
       </section>
 
       {/* CATEGORIAS */}
-      {[
-        "Cidades",
-        "Política",
-        "Brasil",
-        "Economia",
-        "Mundo",
-        "Diversão e Arte",
-        "Ciência e Saúde",
-        "Eu Estudante",
-        "Concursos",
-        "Direitos e Justiça",
-        "Publicidade Legal",
-        "Classificados",
-        "Polícia",
-      ].map((category) => (
-        <section key={category} className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">{category}</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Slide com 3 destaques */}
-            <div className="bg-gray-200 h-[600px] rounded flex items-center justify-center">
-              <Slide slides={slides} />
-            </div>
-            {/* Lista vertical com outros 3 destaques */}
-            <div className="h-full rounded flex items-center justify-between">
-              <div className="bg-gray-200 w-full h-full rounded grid grid-cols-1 gap-2">
-                {news.map((item, index) => (
-                  <HorizontalNewsCard
-                    key={index}
-                    title={item.title}
-                    category={category}
-                    image={item.image}
-                    link={item.link}
+      <div className="grid grid-cols-1 gap-12">
+        {[
+          "Cidades",
+          "Política",
+          "Brasil",
+          "Economia",
+          "Mundo",
+          "Diversão e Arte",
+          "Ciência e Saúde",
+          "Eu Estudante",
+          "Concursos",
+          "Direitos e Justiça",
+          "Publicidade Legal",
+          "Classificados",
+          "Polícia",
+        ].map((category) => (
+          <section key={category}>
+            <h2 className="text-2xl font-bold mb-6">{category}</h2>
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="w-full lg:w-1/2">
+                <div className="h-[400px] rounded-lg overflow-hidden">
+                  <Slide
+                    slides={news
+                      .filter((item) => item.category === category)
+                      .slice(0, 3)}
                   />
-                ))}
+                </div>
+              </div>
+              <div className="w-full lg:w-1/2">
+                {buildNewsByCategory(news, category)}
               </div>
             </div>
-          </div>
-        </section>
-      ))}
+          </section>
+        ))}
+      </div>
     </main>
+  );
+}
+
+function buildDestaques(news) {
+  if (!news?.length) {
+    return (
+      <p className="text-gray-500 text-center p-4">
+        Nenhum destaque disponível no momento.
+      </p>
+    );
+  }
+
+  return news
+    .slice(1, 3)
+    .map((item) => (
+      <NewsCard
+        key={item.id}
+        title={item.title}
+        category={item.category}
+        image={item.imageUrl}
+        slug={item.slug}
+      />
+    ));
+}
+
+function buildNewsByCategory(news, category) {
+  const filteredNews = news.filter((item) => item.category === category);
+
+  if (!filteredNews?.length) {
+    return (
+      <p className="text-gray-500 text-center p-4">
+        Nenhuma notícia disponível nesta categoria.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {filteredNews.slice(0, 3).map((item) => (
+        <HorizontalNewsCard
+          key={item.id}
+          title={item.title}
+          category={item.category}
+          image={item.imageUrl}
+          slug={`/post/${item.slug}`}
+        />
+      ))}
+    </div>
   );
 }

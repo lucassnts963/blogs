@@ -1,20 +1,52 @@
+// SignupScreen.js
 "use client";
 
 import React, { useState } from "react";
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-const SignupScreen = () => {
+function SignupScreen() {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    // Lógica de cadastro seria implementada aqui
-    console.log("Dados de cadastro:", { username, email, password });
-  };
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/v1/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, username }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao criar conta");
+      }
+
+      // Salvar token no localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Redirecionar para a página inicial
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -30,6 +62,12 @@ const SignupScreen = () => {
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
           Criar Conta
         </h2>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
@@ -48,7 +86,8 @@ const SignupScreen = () => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Escolha seu nome de usuário"
                 required
-                className="w-full p-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                disabled={isLoading}
+                className="w-full p-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100"
               />
             </div>
           </div>
@@ -69,7 +108,8 @@ const SignupScreen = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Digite seu e-mail"
                 required
-                className="w-full p-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                disabled={isLoading}
+                className="w-full p-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100"
               />
             </div>
           </div>
@@ -91,12 +131,14 @@ const SignupScreen = () => {
                 placeholder="Crie sua senha"
                 required
                 minLength={6}
-                className="w-full p-2 pl-10 pr-10 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                disabled={isLoading}
+                className="w-full p-2 pl-10 pr-10 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 text-gray-500 hover:text-gray-700"
+                disabled={isLoading}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -107,9 +149,10 @@ const SignupScreen = () => {
           <div>
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              disabled={isLoading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-400"
             >
-              Cadastrar
+              {isLoading ? "Cadastrando..." : "Cadastrar"}
             </button>
           </div>
         </form>
@@ -118,7 +161,7 @@ const SignupScreen = () => {
           <p className="text-sm text-gray-600">
             Já tem uma conta?{" "}
             <Link
-              href="/autenticacao/login"
+              href="/auth/login"
               className="font-medium text-orange-600 hover:text-orange-500"
             >
               Fazer Login
@@ -128,6 +171,6 @@ const SignupScreen = () => {
       </div>
     </div>
   );
-};
+}
 
 export default SignupScreen;

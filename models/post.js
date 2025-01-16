@@ -1,4 +1,5 @@
 import database from "infra/database";
+import { extractFirstImagefromMarkdown } from "lib/utils";
 
 /**
  * @typedef {Object} Post
@@ -72,15 +73,37 @@ async function create({
  * @param {Object} [options]
  * @param {number} [options.limit=10] - Limite de registros
  * @param {number} [options.offset=0] - Offset para paginação
+ * @param {string} [options.blogId] - Offset para paginação
  * @returns {Promise<Post[]>}
  */
-async function findAll({ limit = 10, offset = 0 } = {}) {
+async function findAll({ limit = 10, offset = 0, blogId } = {}) {
   try {
+    if (!blogId) {
+      throw new Error("blogId not found!");
+    }
+
     const result = await database.query({
-      text: `SELECT * FROM posts`,
+      text: `
+        SELECT 
+          p.uuid as id, p.title, p.subtitle, p.content, p."postedAt", p.slug, c.description as category
+        FROM 
+          posts p 
+        JOIN 
+          categories c ON p."categoryId" = c.uuid
+        WHERE 
+          p."blogId" = $1
+        ORDER BY 
+          p."postedAt"
+      `,
+      values: [blogId],
     });
 
-    return result.rows;
+    const posts = result.rows.map((post) => ({
+      imageUrl: extractFirstImagefromMarkdown(post.content),
+      ...post,
+    }));
+
+    return posts;
   } catch (error) {
     throw error;
   }

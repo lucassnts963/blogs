@@ -1,6 +1,7 @@
+//app/api/v1/auth/login
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import database from "@/infra/database";
+import database from "infra/database";
 import { signJWT } from "lib/auth";
 
 export async function OPTIONS() {
@@ -23,7 +24,7 @@ export async function POST(request) {
 
     // Busca usuário
     const result = await database.query({
-      text: "SELECT uuid AS id, email, name, password FROM users WHERE email = $1",
+      text: "SELECT uuid AS id, username, email, password FROM users WHERE email = $1",
       values: [email],
     });
 

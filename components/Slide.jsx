@@ -1,5 +1,4 @@
 "use client";
-
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -7,29 +6,43 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 export function Slide({ slides }) {
+  if (!slides?.length) {
+    return (
+      <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+        <p className="text-gray-500">Nenhum slide disponível</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}
         navigation
         pagination={{ clickable: true }}
         autoplay={{ delay: 5000 }}
         loop
-        className="w-full h-full"
+        className="w-full h-full rounded-lg"
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
-            <div className="relative w-full h-[600px] bg-gray-200 flex items-center justify-center">
-              {/* Background Image */}
+            <div className="relative w-full h-full">
               <img
-                src={slide.image}
+                src={slide.imageUrl}
                 alt={slide.title}
-                className="absolute inset-0 w-full h-full object-cover rounded"
+                className="absolute inset-0 w-full h-full object-cover"
               />
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-white text-center p-4">
-                <h2 className="text-2xl font-bold">{slide.title}</h2>
-                <p className="mt-2">{slide.description}</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold line-clamp-2">
+                    {slide.title}
+                  </h2>
+                  {slide.subtitle && (
+                    <p className="mt-2 text-sm md:text-base line-clamp-2 text-gray-200">
+                      {slide.subtitle}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </SwiperSlide>

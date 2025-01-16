@@ -1,7 +1,6 @@
-// app/api/auth/register/route.ts
+// app/api/v1/auth/register/route.ts
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import database from "@/infra/database";
 import { signJWT } from "lib/auth";
 
 import User from "models/user";
@@ -24,14 +23,15 @@ export async function POST(request) {
     const { email, password, username } = await request.json();
 
     // Verifica se usuário já existe
-    const userExists = await User.findOneByEmail(email);
+    // const userExists = await User.findOneByEmail(email);
+    // console.log(userExists);
 
-    if (userExists) {
-      return NextResponse.json(
-        { error: "Email já cadastrado" },
-        { status: 400 }
-      );
-    }
+    // if (userExists) {
+    //   return NextResponse.json(
+    //     { error: "Email já cadastrado" },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Hash da senha
     const hashedPassword = await bcrypt.hash(password, 10);

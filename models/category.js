@@ -25,7 +25,7 @@ async function create(description) {
 async function findAll() {
   try {
     const result = await database.query({
-      text: "SELECT * FROM categories",
+      text: "SELECT uuid as id, description FROM categories",
     });
 
     return result.rows;

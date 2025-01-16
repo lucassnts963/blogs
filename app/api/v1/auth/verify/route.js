@@ -1,4 +1,4 @@
-// app/api/auth/verify/route.ts
+// app/api/v1/auth/verify/route.ts
 import { NextResponse } from "next/server";
 import { verifyJWT } from "@/lib/auth";
 
