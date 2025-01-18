@@ -26,7 +26,11 @@ WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/.next ./.next
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/package*.json ./
-COPY --from=buider /usr/src/app/infra/migrations ./migrations
+COPY --from=builder /usr/src/app/infra/migrations ./infra/migrations
+COPY --from=builder /usr/src/app/public ./public
+COPY --from=builder /usr/src/app/entrypoint.sh ./entrypoint.sh
+
+RUN chmod +x ./entrypoint.sh
 
 # Instale node-pg-migrate globalmente
 RUN npm install -g node-pg-migrate
