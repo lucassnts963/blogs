@@ -1,0 +1,65 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+  seed     = "node infra/prisma/seed.js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Using String instead of enum since SQLite doesn't support enums
+model User {
+  uuid     String @id @default(uuid())
+  type     String // Will accept 'admin', 'user', 'master'
+  username String @unique
+  email    String @unique
+  password String @default("123456789")
+  blogs    Blog[]
+  likes    Like[]
+}
+
+model Category {
+  uuid        String @id @default(uuid())
+  description String
+  posts       Post[]
+}
+
+model Blog {
+  uuid      String   @id @default(uuid())
+  name      String
+  category  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  userId    String
+  posts     Post[]
+}
+
+model Post {
+  uuid       String    @id @default(uuid())
+  title      String
+  subtitle   String?
+  slug       String    @unique
+  content    String?
+  postedAt   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
+  blog       Blog      @relation(fields: [blogId], references: [uuid], onDelete: Cascade)
+  blogId     String
+  category   Category  @relation(fields: [categoryId], references: [uuid], onDelete: Cascade)
+  categoryId String
+  likes      Like[]
+
+  @@index([blogId])
+}
+
+model Like {
+  uuid   String   @id @default(uuid())
+  liked  Boolean?
+  user   User     @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  userId String
+  post   Post     @relation(fields: [postId], references: [uuid], onDelete: Cascade)
+  postId String
+}
