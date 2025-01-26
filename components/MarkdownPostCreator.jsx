@@ -123,7 +123,7 @@ export function MarkdownPostCreator({ blogId, categories }) {
       }
 
       const postData = {
-        blogId: "7848c6a6-ee92-40c6-950e-2700418dba6d",
+        blogId,
         title: formData.title.trim(),
         subtitle: formData.subtitle.trim(),
         content: formData.content.trim(),
@@ -168,8 +168,6 @@ export function MarkdownPostCreator({ blogId, categories }) {
 
   return (
     <div className="container mx-auto max-w-4xl p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">Criar Novo Post</h1>
-
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-4">
           {error}

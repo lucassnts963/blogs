@@ -1,163 +1,302 @@
-// app/admin/page.jsx
 "use client";
-
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Upload,
-  Image as ImageIcon,
   FileText,
   Plus,
   Trash2,
+  Settings,
+  Layout,
+  Book,
+  Image as ImageIcon,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { UserSection } from "components/UserSection";
+import { BlogTab } from "./_components/BlogTab";
+import { PostTab } from "./_components/PostTab";
 
-export default function AdminDashboard() {
-  const router = useRouter();
+function AdminDashboard() {
   const [user, setUser] = useState(null);
+  const [blogs, setBlogs] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [images, setImages] = useState([]);
-  const [documents, setDocuments] = useState([]);
-  const [newPost, setNewPost] = useState({
-    title: "",
-    content: "",
-    category: "Cidades",
-    image: null,
+  const [media, setMedia] = useState({
+    images: [],
+    documents: [],
   });
+  const [activeTab, setActiveTab] = useState("blogs");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+    function checkAuth() {
+      const token = localStorage.getItem("token");
+      const userStr = localStorage.getItem("user");
+      const userData = JSON.parse(userStr);
 
-    if (!userStr || !token) {
-      router.push("/autenticacao/login");
-      return;
+      if (!token || !userStr) {
+        window.location.href = "/autenticacao/login";
+        return;
+      }
+
+      setUser(userData);
+      fetchAllData(userData.id);
     }
 
-    setUser(JSON.parse(userStr));
-    // Here you would fetch posts, images, and documents from your API
+    checkAuth();
   }, []);
 
-  const categories = [
-    "Cidades",
-    "Política",
-    "Brasil",
-    "Economia",
-    "Mundo",
-    "Diversão e Arte",
-    "Ciência e Saúde",
-    "Eu Estudante",
-    "Concursos",
-    "Direitos e Justiça",
-    "Publicidade Legal",
-    "Classificados",
-    "Polícia",
-  ];
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Here you would implement image upload to your server
-      console.log("Uploading image:", file);
+  async function fetchAllData(userId) {
+    setLoading(true);
+    try {
+      await Promise.all([
+        fetchBlogs(userId),
+        // fetchPosts(userId),
+        // fetchMedia(userId),
+      ]);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
-  const handleDocumentUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Here you would implement PDF upload to your server
-      console.log("Uploading document:", file);
+  async function fetchBlogs(userId) {
+    try {
+      const response = await fetch(`/api/v1/blogs?userId=${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Falha ao buscar blogs");
+      const data = await response.json();
+      setBlogs(data);
+    } catch (error) {
+      console.error("Erro ao buscar blogs:", error);
     }
-  };
+  }
 
-  const handleSubmitPost = async (e) => {
-    e.preventDefault();
-    // Here you would implement post creation logic
-    console.log("Creating post:", newPost);
-  };
+  async function fetchPosts(userId) {
+    try {
+      const response = await fetch(`/api/v1/blogs/posts?userId=${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Falha ao buscar posts");
+      const data = await response.json();
+      setPosts(data);
+    } catch (error) {
+      console.error("Erro ao buscar posts:", error);
+    }
+  }
+
+  async function fetchMedia(userId) {
+    try {
+      const response = await fetch(`/api/v1/blogs/media?userId=${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Falha ao buscar mídia");
+      const data = await response.json();
+      setMedia(data);
+    } catch (error) {
+      console.error("Erro ao buscar mídia:", error);
+    }
+  }
+
+  async function handleMediaUpload(e, type) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", type);
+
+    try {
+      const response = await fetch("/api/v1/blogs/media", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Falha ao fazer upload");
+
+      const data = await response.json();
+      if (type === "image") {
+        setMedia((prev) => ({
+          ...prev,
+          images: [...prev.images, data],
+        }));
+      } else {
+        setMedia((prev) => ({
+          ...prev,
+          documents: [...prev.documents, data],
+        }));
+      }
+    } catch (error) {
+      console.error("Erro ao fazer upload:", error);
+    }
+  }
+
+  async function handleDeleteBlog(blogId) {
+    try {
+      const response = await fetch(`/api/v1/blogs/${blogId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Falha ao deletar blog");
+
+      setBlogs(blogs.filter((blog) => blog.id !== blogId));
+    } catch (error) {
+      console.error("Erro ao deletar blog:", error);
+    }
+  }
+
+  async function handleDeleteMedia(mediaId, type) {
+    try {
+      const response = await fetch(`/api/v1/blogs/media/${mediaId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Falha ao deletar mídia");
+
+      if (type === "image") {
+        setMedia((prev) => ({
+          ...prev,
+          images: prev.images.filter((img) => img.id !== mediaId),
+        }));
+      } else {
+        setMedia((prev) => ({
+          ...prev,
+          documents: prev.documents.filter((doc) => doc.id !== mediaId),
+        }));
+      }
+    } catch (error) {
+      console.error("Erro ao deletar mídia:", error);
+    }
+  }
+
+  function TabButton({ tab, active, onClick, children }) {
+    return (
+      <button
+        onClick={() => onClick(tab)}
+        className={`px-4 py-2 font-medium rounded-lg ${
+          active ? "bg-blue-500 text-white" : "text-gray-600 hover:bg-gray-100"
+        }`}
+      >
+        {children}
+      </button>
+    );
+  }
+
+  if (!user) {
+    return <div>Verificando login...</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        <header className="bg-white shadow-sm rounded-lg p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Painel Administrativo
-          </h1>
-          <p className="text-gray-600">Bem-vindo, {user?.name}</p>
-        </header>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Painel do administrador
+              </h1>
+              <p className="text-sm text-gray-500">Bem-vindo, {user?.email}</p>
+            </div>
+            <div>
+              <UserSection />
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Create Post Form */}
-          <section className="bg-white shadow-sm rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Criar Nova Postagem</h2>
-            <form onSubmit={handleSubmitPost} className="space-y-4">
+          {/* Stats Overview */}
+          <div className="grid gap-4 md:grid-cols-3 mt-6">
+            <div className="flex items-center space-x-4 rounded-lg border p-4">
+              <Book className="h-6 w-6 text-blue-500" />
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Título
-                </label>
-                <input
-                  type="text"
-                  value={newPost.title}
-                  onChange={(e) =>
-                    setNewPost({ ...newPost, title: e.target.value })
-                  }
-                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                  required
-                />
+                <p className="text-sm font-medium">Total de Blogs</p>
+                <p className="text-2xl font-bold">{blogs.length}</p>
               </div>
-
+            </div>
+            <div className="flex items-center space-x-4 rounded-lg border p-4">
+              <Layout className="h-6 w-6 text-green-500" />
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Categoria
-                </label>
-                <select
-                  value={newPost.category}
-                  onChange={(e) =>
-                    setNewPost({ ...newPost, category: e.target.value })
-                  }
-                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                >
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
+                <p className="text-sm font-medium">Total de Posts</p>
+                <p className="text-2xl font-bold">{posts.length}</p>
               </div>
-
+            </div>
+            <div className="flex items-center space-x-4 rounded-lg border p-4">
+              <ImageIcon className="h-6 w-6 text-purple-500" />
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Conteúdo
-                </label>
-                <textarea
-                  value={newPost.content}
-                  onChange={(e) =>
-                    setNewPost({ ...newPost, content: e.target.value })
-                  }
-                  rows={6}
-                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                  required
-                />
+                <p className="text-sm font-medium">Arquivos</p>
+                <p className="text-2xl font-bold">
+                  {media.images.length + media.documents.length}
+                </p>
               </div>
+            </div>
+          </div>
+        </div>
 
-              <button
-                type="submit"
-                className="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700"
-              >
-                <Plus className="inline-block mr-2" size={20} />
-                Criar Postagem
-              </button>
-            </form>
-          </section>
+        {/* Tabs Navigation */}
+        <div className="bg-white rounded-lg shadow-sm p-4">
+          <div className="flex space-x-2 mb-4">
+            <TabButton
+              tab="blogs"
+              active={activeTab === "blogs"}
+              onClick={setActiveTab}
+            >
+              Blogs
+            </TabButton>
+            <TabButton
+              tab="posts"
+              active={activeTab === "posts"}
+              onClick={setActiveTab}
+            >
+              Posts
+            </TabButton>
+            <TabButton
+              tab="media"
+              active={activeTab === "media"}
+              onClick={setActiveTab}
+            >
+              Mídia
+            </TabButton>
+          </div>
 
-          {/* Media Management */}
-          <section className="space-y-6">
-            {/* Image Upload */}
-            <div className="bg-white shadow-sm rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Gerenciar Imagens</h2>
-              <div className="space-y-4">
+          {/* Blogs Content */}
+          {activeTab === "blogs" && (
+            <BlogTab blogs={blogs} user={user} onCreate={setBlogs} />
+          )}
+
+          {/* Posts Content */}
+          {activeTab === "posts" && <PostTab blogs={blogs} />}
+
+          {/* Media Content */}
+          {activeTab === "media" && (
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Image Upload */}
+              <div className="bg-white rounded-lg p-6 border">
+                <h2 className="text-xl font-semibold mb-4">Imagens</h2>
                 <label className="block w-full cursor-pointer">
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="mx-auto text-gray-400" size={24} />
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400">
+                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
                     <p className="mt-2 text-sm text-gray-500">
                       Clique para fazer upload de imagens
                     </p>
@@ -166,66 +305,67 @@ export default function AdminDashboard() {
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={handleImageUpload}
+                    onChange={(e) => handleMediaUpload(e, "image")}
                   />
                 </label>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {images.map((image, index) => (
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  {media.images.map((image, index) => (
                     <div key={index} className="relative group">
                       <img
                         src={image.url}
                         alt={image.name}
-                        className="rounded-lg"
+                        className="rounded-lg object-cover w-full h-32"
                       />
-                      <button className="absolute top-2 right-2 bg-red-500 p-1 rounded-full opacity-0 group-hover:opacity-100">
-                        <Trash2 size={16} className="text-white" />
+                      <button className="absolute top-2 right-2 bg-red-500 p-1 rounded-full text-white opacity-0 group-hover:opacity-100">
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Document Upload */}
-            <div className="bg-white shadow-sm rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                Gerenciar Documentos
-              </h2>
-              <div className="space-y-4">
+              {/* Document Upload */}
+              <div className="bg-white rounded-lg p-6 border">
+                <h2 className="text-xl font-semibold mb-4">Documentos</h2>
                 <label className="block w-full cursor-pointer">
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <FileText className="mx-auto text-gray-400" size={24} />
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400">
+                    <FileText className="mx-auto h-12 w-12 text-gray-400" />
                     <p className="mt-2 text-sm text-gray-500">
-                      Clique para fazer upload de PDFs
+                      Clique para fazer upload de documentos
                     </p>
                   </div>
                   <input
                     type="file"
-                    accept=".pdf"
+                    accept=".pdf,.doc,.docx"
                     className="hidden"
-                    onChange={handleDocumentUpload}
+                    onChange={(e) => handleMediaUpload(e, "document")}
                   />
                 </label>
 
-                <div className="space-y-2">
-                  {documents.map((doc, index) => (
+                <div className="mt-4 space-y-2">
+                  {media.documents.map((doc, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                     >
-                      <span className="text-sm text-gray-600">{doc.name}</span>
-                      <button className="text-red-500 hover:text-red-700">
-                        <Trash2 size={16} />
+                      <div className="flex items-center space-x-3">
+                        <FileText className="h-5 w-5 text-gray-400" />
+                        <span className="text-sm font-medium">{doc.name}</span>
+                      </div>
+                      <button className="text-red-500 hover:text-red-600">
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-          </section>
+          )}
         </div>
       </div>
     </div>
   );
 }
+
+export default AdminDashboard;
