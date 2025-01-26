@@ -6,7 +6,6 @@ import { formatDate } from "lib/utils";
 import { Facebook, Twitter, Instagram } from "lucide-react";
 import { MobileMenu } from "components/MobileMenu";
 import { MobileSearch } from "components/MobileSearch";
-import { UserSection } from "components/UserSection";
 
 export const metadata = {
   title: "Jornal o Nordeste Paraense",
@@ -53,18 +52,6 @@ export default function RootLayout({ children }) {
                 >
                   Anuncie
                 </Link>
-
-                <UserSection />
-
-                {/* Font Size Controls */}
-                {/* <div className="hidden md:flex items-center gap-2 px-2 border-l border-orange-600">
-                  <button className="text-white text-sm hover:text-orange-200">
-                    A+
-                  </button>
-                  <button className="text-white text-sm hover:text-orange-200">
-                    A-
-                  </button>
-                </div> */}
 
                 {/* Social Media */}
                 <div className="flex items-center gap-3 px-2 border-l border-orange-600">
