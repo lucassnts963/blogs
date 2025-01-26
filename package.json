@@ -5,30 +5,40 @@
   "repository": "https://github.com/lucassnts963/blogs.git",
   "author": "Lucas Santos <lucassnts963@gmail>",
   "license": "MIT",
+  "prisma": {
+    "seed": "node infra/prisma/seed.js"
+  },
   "scripts": {
     "start": "next start",
     "build": "next build",
     "dev": "next dev",
-    "migration:create": "node-pg-migrate -m infra/migrations create",
-    "migration:up": "node-pg-migrate -m infra/migrations --envPath .env.development up",
+    "prisma:migration": "prisma migrate dev --schema=./infra/prisma/schema.prisma --name",
+    "prisma:studio": "prisma studio --schema=./infra/prisma/schema.prisma",
+    "prisma:generate": "prisma generate --schema=./infra/prisma/schema.prisma",
+    "prisma:seed": "prisma db seed --schema=./infra/prisma/schema.prisma",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand"
   },
   "dependencies": {
+    "@prisma/client": "^6.2.1",
     "@tailwindcss/typography": "^0.5.16",
     "bcrypt": "^5.1.1",
     "firebase": "^11.1.0",
     "gray-matter": "^4.0.3",
     "jose": "^5.9.6",
+    "knex": "3.0.1",
     "lucide-react": "^0.464.0",
     "next": "14.2.17",
     "node-pg-migrate": "^7.7.1",
+    "oracledb": "^6.7.1",
     "pg": "^8.13.1",
+    "pg-query-stream": "^4.7.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-markdown": "^9.0.1",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1",
+    "sqlite3": "^5.1.7",
     "swiper": "^11.1.15"
   },
   "devDependencies": {
@@ -36,6 +46,7 @@
     "dotenv": "^16.4.5",
     "jest": "^29.7.0",
     "postcss": "^8.4.49",
+    "prisma": "^6.2.1",
     "tailwindcss": "^3.4.15"
   }
 }
