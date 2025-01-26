@@ -89,8 +89,16 @@ export function BlogTab({ user, blogs, onCreate }) {
               disabled={isLoading}
               className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 flex items-center justify-center"
             >
-              <Plus className="mr-2 h-4 w-4" />{" "}
-              {isLoading ? "Criando..." : "Criar Blog"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin mr-2" size={20} /> Criando
+                  ...
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" /> Criar Blog
+                </>
+              )}
             </button>
           </form>
         </div>
