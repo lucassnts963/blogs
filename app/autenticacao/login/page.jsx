@@ -39,7 +39,7 @@ function LoginScreen() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // Redirecionar para a página inicial
-      router.push("/");
+      router.back();
     } catch (err) {
       setError(err.message);
     } finally {

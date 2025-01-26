@@ -1,4 +1,3 @@
-// SignupScreen.js
 "use client";
 
 import React, { useState } from "react";
@@ -40,7 +39,7 @@ function SignupScreen() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // Redirecionar para a página inicial
-      router.push("/dashboard");
+      router.push("/").then(() => window.location.reload());
     } catch (err) {
       setError(err.message);
     } finally {
