@@ -1,8 +1,10 @@
-//app/api/v1/auth/login
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import database from "infra/database";
 import { signJWT } from "lib/auth";
+
+import User from "models/user";
+import { InvalidCrendetial } from "error/InvalidCredential";
+import { EmailNotFound } from "error/EmailNotFound";
 
 export async function OPTIONS() {
   return NextResponse.json(
@@ -17,57 +19,54 @@ export async function OPTIONS() {
   );
 }
 
-// Handler para o método POST (login)
 export async function POST(request) {
   try {
     const { email, password } = await request.json();
 
-    // Busca usuário
-    const result = await database.query({
-      text: "SELECT uuid AS id, username, email, password FROM users WHERE email = $1",
-      values: [email],
-    });
+    try {
+      const user = await User.findOneByEmail(email);
 
-    if (result.rows.length === 0) {
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (!validPassword) {
+        throw new InvalidCrendetial();
+      }
+
+      const token = await signJWT({
+        id: user.uuid,
+        username: user.username,
+        email: user.email,
+        level: user.type,
+      });
+
       return NextResponse.json(
-        { error: "Credenciais inválidas" },
-        { status: 401, headers: { "Access-Control-Allow-Origin": "*" } }
-      );
-    }
-
-    const user = result.rows[0];
-
-    // Verifica senha
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      return NextResponse.json(
-        { error: "Credenciais inválidas" },
-        { status: 401, headers: { "Access-Control-Allow-Origin": "*" } }
-      );
-    }
-
-    // Gera token JWT
-    const token = await signJWT({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    });
-
-    return NextResponse.json(
-      {
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
+        {
+          user: {
+            id: user.uuid,
+            email: user.email,
+            username: user.username,
+            level: user.type,
+          },
+          token,
         },
-        token,
-      },
-      { headers: { "Access-Control-Allow-Origin": "*" } }
-    );
+        { headers: { "Access-Control-Allow-Origin": "*" } }
+      );
+    } catch (error) {
+      if (
+        !(error instanceof InvalidCrendetial) ||
+        !(error instanceof EmailNotFound)
+      ) {
+        throw error;
+      }
+
+      return NextResponse.json(
+        { error: "Credenciais inválidas" },
+        { status: 401, headers: { "Access-Control-Allow-Origin": "*" } }
+      );
+    }
   } catch (error) {
     return NextResponse.json(
       { error: "Erro ao fazer login", details: error.message },
-      { status: 400, headers: { "Access-Control-Allow-Origin": "*" } }
+      { status: 500, headers: { "Access-Control-Allow-Origin": "*" } }
     );
   }
 }

@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { signJWT } from "lib/auth";
 
 import User from "models/user";
+import { EmailNotFound } from "error/EmailNotFound";
 
 export async function OPTIONS() {
   return NextResponse.json(
@@ -22,22 +23,23 @@ export async function POST(request) {
   try {
     const { email, password, username } = await request.json();
 
-    // Verifica se usuário já existe
-    // const userExists = await User.findOneByEmail(email);
-    // console.log(userExists);
-
-    // if (userExists) {
-    //   return NextResponse.json(
-    //     { error: "Email já cadastrado" },
-    //     { status: 400 }
-    //   );
-    // }
+    try {
+      await User.findOneByEmail(email);
+      return NextResponse.json(
+        { error: "Email já cadastrado" },
+        { status: 400 }
+      );
+    } catch (error) {
+      if (!(error instanceof EmailNotFound)) {
+        throw error;
+      }
+    }
 
     // Hash da senha
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Insere novo usuário
-    const result = await User.create({
+    const user = await User.create({
       email,
       username,
       type: "user",
@@ -46,12 +48,12 @@ export async function POST(request) {
 
     // Gera token JWT
     const token = await signJWT({
-      id: result.rows[0].id,
-      email: result.rows[0].email,
+      id: user.uuid,
+      email: user.email,
     });
 
     return NextResponse.json({
-      user: result.rows[0],
+      user: user.uuid,
       token,
     });
   } catch (error) {
