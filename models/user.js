@@ -1,63 +1,149 @@
+import { EmailNotFound } from "error/EmailNotFound";
 import database from "infra/database";
 
 /**
  * @param fields {username: string, email: string, type: "admin" | "user" | "master"}
- * @returns {Promise<{username: string, email: string, type: "admin" | "user" | "master"}> | {username: string, email: string, type: "admin" | "user" | "master"}}
+ * @returns {Promise<{uuid: string, username: string, email: string, type: "admin" | "user" | "master"}>}
  */
 async function create({ username, email, type, password }) {
   try {
-    const result = await database.query({
-      text: "INSERT INTO users (username, email, type, password) VALUES ($1, $2, $3, $4) RETURNING *",
-      values: [username, email, type, password],
+    const user = await database.prisma.user.create({
+      data: { username, email, type, password },
+      select: { username: true, email: true, type: true, uuid: true }, // Exclude password from response
     });
-
-    const user = result.rows[0];
 
     return user;
   } catch (error) {
+    console.error("Error creating user:", error);
     throw error;
   }
 }
-// READ
+
 /**
- * @returns {Promise<{username: string, email: string, type: "admin" | "user" | "master"}[]> | {username: string, email: string, type: "admin" | "user" | "master"}[]}
+ * @returns {Promise<{username: string, email: string, type: "admin" | "user" | "master"}[]>}
  */
 async function findAll() {
   try {
-    const result = await database.query({
-      text: "SELECT * FROM users",
+    const users = await database.prisma.user.findMany({
+      select: { username: true, email: true, type: true }, // Exclude password from response
     });
 
-    const users = result.rows;
-
-    return [...users];
+    return users;
   } catch (error) {
+    console.error("Error fetching users:", error);
     throw error;
   }
 }
 
+/**
+ * @param {string} email
+ * @returns {Promise<{uuid: string, username: string, email: string, type: "admin" | "user" | "master", password: string}>}
+ */
 async function findOneByEmail(email) {
   try {
-    const result = await database.query({
-      text: "SELECT * FROM users WHERE email = $1",
-      values: [email],
+    const user = await database.prisma.user.findUnique({
+      where: { email },
+      select: {
+        uuid: true,
+        username: true,
+        email: true,
+        type: true,
+        password: true,
+      }, // Exclude password from response
     });
 
-    if (result.rows.length <= 0) {
-      throw new Error("E-mail não existe");
+    if (!user) {
+      throw new EmailNotFound();
     }
+
+    return user;
   } catch (error) {
+    console.error("Error finding user by email:", error);
     throw error;
   }
 }
 
-//TODO: Implementar o restante dos métodos
-async function findOnById() {}
-async function findOnByUsername() {}
-// UPDATE
-async function update() {}
-// DELETE
-async function del() {}
+/**
+ * @param {string} id
+ * @returns {Promise<{uuid: string, username: string, email: string, type: "admin" | "user" | "master"}>}
+ */
+async function findOnById(id) {
+  try {
+    const user = await database.prisma.user.findUnique({
+      where: { uuid: id },
+      select: { uuid: true, username: true, email: true, type: true }, // Exclude password from response
+    });
+
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    return user;
+  } catch (error) {
+    console.error("Error finding user by ID:", error);
+    throw error;
+  }
+}
+
+/**
+ * @param {string} username
+ * @returns {Promise<{username: string, email: string, type: "admin" | "user" | "master"}>}
+ */
+async function findOnByUsername(username) {
+  try {
+    const user = await database.prisma.user.findUnique({
+      where: { username },
+      select: { username: true, email: true, type: true, password: true }, // Exclude password from response
+    });
+
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    return user;
+  } catch (error) {
+    console.error("Error finding user by username:", error);
+    throw error;
+  }
+}
+
+/**
+ * @param {string} id
+ * @param {object} data
+ * @returns {Promise<{username: string, email: string, type: "admin" | "user" | "master"}>}
+ */
+async function update(id, data) {
+  try {
+    const user = await database.prisma.user.update({
+      where: { uuid: id },
+      data,
+      select: { username: true, email: true, type: true }, // Exclude password from response
+    });
+
+    return user;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
+}
+
+/**
+ * @param {string} id
+ * @returns {Promise<{uuid: string, username: string, email: string, type: "admin" | "user" | "master"}>}
+ */
+async function del(id) {
+  try {
+    const user = await database.prisma.user.delete({
+      where: { uuid: id },
+      select: { uuid: true, username: true, email: true, type: true }, // Exclude password from response
+    });
+
+    return user;
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
+  }
+}
 
 export default {
   create,
