@@ -21,22 +21,15 @@ export function UserSection() {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setUser(null);
-    router.push("/");
+    router.push("/autenticacao/login");
   }
 
   if (user) {
     return (
       <div className="flex items-center gap-4">
-        <Link
-          href="/admin"
-          className="flex items-center gap-2 text-white hover:text-orange-200"
-        >
-          <User size={20} />
-          <span>{user.name}</span>
-        </Link>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 text-white hover:text-orange-200"
+          className="flex items-center gap-2 text-orange-500 hover:text-orange-700"
         >
           <LogOut size={20} />
           <span className="hidden md:inline">Sair</span>
