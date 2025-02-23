@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { Layout, Book, Image as ImageIcon } from "lucide-react";
 import { UserSection } from "components/UserSection";
 import { BlogTab } from "./_components/BlogTab";
@@ -18,7 +18,7 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    function checkAuth() {
+    if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       const userStr = localStorage.getItem("user");
       const userData = JSON.parse(userStr);
@@ -31,8 +31,6 @@ function AdminDashboard() {
       setUser(userData);
       fetchAllData(userData.id);
     }
-
-    checkAuth();
   }, []);
 
   async function fetchAllData(userId) {
@@ -93,6 +91,10 @@ function AdminDashboard() {
         {children}
       </button>
     );
+  }
+
+  if (loading) {
+    return <div>Carregando...</div>;
   }
 
   if (!user) {
@@ -170,18 +172,20 @@ function AdminDashboard() {
             </TabButton>
           </div>
 
-          {/* Blogs Content */}
-          {activeTab === "blogs" && (
-            <BlogTab blogs={blogs} user={user} onCreate={setBlogs} />
-          )}
+          <Suspense fallback={<div>Carregando...</div>}>
+            {/* Blogs Content */}
+            {activeTab === "blogs" && (
+              <BlogTab blogs={blogs} user={user} onCreate={setBlogs} />
+            )}
 
-          {/* Posts Content */}
-          {activeTab === "posts" && <PostTab blogs={blogs} />}
+            {/* Posts Content */}
+            {activeTab === "posts" && <PostTab blogs={blogs} />}
 
-          {/* Media Content */}
-          {activeTab === "media" && (
-            <MediaTab media={media} onUpload={setMedia} />
-          )}
+            {/* Media Content */}
+            {activeTab === "media" && (
+              <MediaTab media={media} onUpload={setMedia} />
+            )}
+          </Suspense>
         </div>
       </div>
     </div>

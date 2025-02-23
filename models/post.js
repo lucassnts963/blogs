@@ -64,35 +64,29 @@ async function create({
  */
 async function findAll({ limit = 10, offset = 0, blogId, userId } = {}) {
   try {
-    if (userId) {
-      const posts = await database.prisma.post.findMany({
-        where: { blog: { userId } },
-      });
+    const where = {};
 
-      return posts.map((post) => ({
-        imageUrl: extractFirstImagefromMarkdown(post.content),
-        ...post,
-      }));
+    if (userId) {
+      where.blog = { userId };
     }
 
     if (blogId) {
-      const posts = await database.prisma.post.findMany({
-        where: { blogId },
-      });
-
-      return posts.map((post) => ({
-        imageUrl: extractFirstImagefromMarkdown(post.content),
-        ...post,
-      }));
+      where.blogId = blogId;
     }
 
-    const posts = await database.prisma.post.findMany();
+    const posts = await database.prisma.post.findMany({
+      where,
+      include: { category: { select: { uuid: true, description: true } } },
+      take: limit,
+      skip: offset,
+    });
 
     return posts.map((post) => ({
       imageUrl: extractFirstImagefromMarkdown(post.content),
       ...post,
     }));
   } catch (error) {
+    console.error("Error fetching posts:", error);
     throw error;
   }
 }

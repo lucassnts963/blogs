@@ -22,13 +22,16 @@ async function create(description) {
  * Retorna todas as categorias.
  * @returns {Promise<{id: number, uuid: string, description: string, created_at: Date, updated_at: Date}[]>}
  */
-async function findAll() {
+async function findAll({ blogId }) {
   try {
-    const result = await database.query({
-      text: "SELECT uuid as id, description FROM categories",
+    const prisma = database.prisma;
+
+    const categories = await prisma.category.findMany({
+      where: { blogId },
+      select: { uuid: true, description: true },
     });
 
-    return result.rows;
+    return categories;
   } catch (error) {
     throw error;
   }

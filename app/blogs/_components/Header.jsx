@@ -5,23 +5,7 @@ import { Facebook, Instagram, Twitter } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-const categories = [
-  "Cidades",
-  "Política",
-  "Brasil",
-  "Economia",
-  "Mundo",
-  "Diversão e Arte",
-  "Ciência e Saúde",
-  "Eu Estudante",
-  "Concursos",
-  "Direitos e Justiça",
-  "Publicidade Legal",
-  "Classificados",
-  "Polícia",
-];
-
-export function Header() {
+export function Header({ categories, blogId }) {
   return (
     <header className="bg-orange-700 text-white">
       {/* Top Bar */}
@@ -101,12 +85,12 @@ export function Header() {
         {/* Desktop Navigation */}
         <ul className="hidden md:flex justify-center items-center flex-wrap gap-x-6 gap-y-2 p-4 text-sm">
           {categories.map((category) => (
-            <li key={category}>
+            <li key={category.uuid}>
               <Link
-                href={`/categorias/${category}`}
+                href={`/blogs/${blogId}/categorias?category=${category.description}`}
                 className="hover:text-orange-200 transition-colors whitespace-nowrap"
               >
-                {category}
+                {category.description}
               </Link>
             </li>
           ))}
