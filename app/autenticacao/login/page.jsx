@@ -39,7 +39,7 @@ function LoginScreen() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // Redirecionar para a página inicial
-      router.back();
+      router.push("/admin");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -51,7 +51,7 @@ function LoginScreen() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="absolute top-4 left-4">
         <Link href="/">
-          <button className="flex invisible md:visible items-center px-4 py-2 bg-orange-600 text-white rounded-lg shadow hover:bg-orange-700 transition duration-300">
+          <button className="flex invisible md:visible items-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition duration-300">
             ← Página Inicial
           </button>
         </Link>
@@ -85,7 +85,7 @@ function LoginScreen() {
                 placeholder="Digite seu e-mail"
                 required
                 disabled={isLoading}
-                className="w-full p-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100"
+                className="w-full p-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               />
             </div>
           </div>
@@ -107,7 +107,7 @@ function LoginScreen() {
                 placeholder="Digite sua senha"
                 required
                 disabled={isLoading}
-                className="w-full p-2 pl-10 pr-10 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100"
+                className="w-full p-2 pl-10 pr-10 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               />
               <button
                 type="button"
@@ -126,7 +126,7 @@ function LoginScreen() {
                 type="checkbox"
                 id="remember-me"
                 disabled={isLoading}
-                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label
                 htmlFor="remember-me"
@@ -139,7 +139,7 @@ function LoginScreen() {
             <div className="text-sm">
               <Link
                 href="/auth/forgot-password"
-                className="font-medium text-orange-600 hover:text-orange-500"
+                className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Esqueceu a senha?
               </Link>
@@ -150,7 +150,7 @@ function LoginScreen() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-orange-400"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
             >
               {isLoading ? "Entrando..." : "Entrar"}
             </button>
@@ -162,7 +162,7 @@ function LoginScreen() {
             Não tem uma conta?{" "}
             <Link
               href="/autenticacao/cadastro"
-              className="font-medium text-orange-600 hover:text-orange-500"
+              className="font-medium text-blue-600 hover:text-blue-500"
             >
               Cadastre-se
             </Link>

@@ -37,31 +37,17 @@ async function create({
   postedAt,
 }) {
   try {
-    const result = await database.query({
-      text: `
-        INSERT INTO posts (
-          "blogId",
-          title,
-          subtitle,
-          slug,
-          content,
-          "categoryId",
-          "postedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING *
-      `,
-      values: [
+    const post = await database.prisma.post.create({
+      data: {
         blogId,
         title,
         subtitle,
         slug,
         content,
         categoryId,
-        postedAt || new Date(),
-      ],
+        postedAt: postedAt || new Date(),
+      },
     });
-
-    const post = result.rows[0];
     return post;
   } catch (error) {
     throw error;
@@ -76,34 +62,36 @@ async function create({
  * @param {string} [options.blogId] - Offset para paginação
  * @returns {Promise<Post[]>}
  */
-async function findAll({ limit = 10, offset = 0, blogId } = {}) {
+async function findAll({ limit = 10, offset = 0, blogId, userId } = {}) {
   try {
-    if (!blogId) {
-      throw new Error("blogId not found!");
+    if (userId) {
+      const posts = await database.prisma.post.findMany({
+        where: { blog: { userId } },
+      });
+
+      return posts.map((post) => ({
+        imageUrl: extractFirstImagefromMarkdown(post.content),
+        ...post,
+      }));
     }
 
-    const result = await database.query({
-      text: `
-        SELECT 
-          p.uuid as id, p.title, p.subtitle, p.content, p."postedAt", p.slug, c.description as category
-        FROM 
-          posts p 
-        JOIN 
-          categories c ON p."categoryId" = c.uuid
-        WHERE 
-          p."blogId" = $1
-        ORDER BY 
-          p."postedAt"
-      `,
-      values: [blogId],
-    });
+    if (blogId) {
+      const posts = await database.prisma.post.findMany({
+        where: { blogId },
+      });
 
-    const posts = result.rows.map((post) => ({
+      return posts.map((post) => ({
+        imageUrl: extractFirstImagefromMarkdown(post.content),
+        ...post,
+      }));
+    }
+
+    const posts = await database.prisma.post.findMany();
+
+    return posts.map((post) => ({
       imageUrl: extractFirstImagefromMarkdown(post.content),
       ...post,
     }));
-
-    return posts;
   } catch (error) {
     throw error;
   }
@@ -115,21 +103,22 @@ async function findAll({ limit = 10, offset = 0, blogId } = {}) {
  */
 async function findOneById(uuid) {
   try {
-    const result = await database.query({
-      text: `
-        SELECT p.*, c.name as category_name
-        FROM posts p
-        LEFT JOIN categories c ON p.categoryId = c.uuid
-        WHERE p.uuid = $1
-      `,
-      values: [uuid],
+    const post = database.prisma.post.findFirst({
+      where: { uuid },
+      include: {
+        category: {
+          select: {
+            description: true,
+          },
+        },
+      },
     });
 
-    if (result.rows.length <= 0) {
+    if (!post) {
       throw new Error("Post não encontrado");
     }
 
-    return result.rows[0];
+    return post;
   } catch (error) {
     throw error;
   }
@@ -141,21 +130,22 @@ async function findOneById(uuid) {
  */
 async function findOneBySlug(slug) {
   try {
-    const result = await database.query({
-      text: `
-        SELECT p.*, c.name as category_name
-        FROM posts p
-        LEFT JOIN categories c ON p.categoryId = c.uuid
-        WHERE p.slug = $1
-      `,
-      values: [slug],
+    const post = database.prisma.post.findFirst({
+      where: { slug },
+      include: {
+        category: {
+          select: {
+            description: true,
+          },
+        },
+      },
     });
 
-    if (result.rows.length <= 0) {
+    if (!post) {
       throw new Error("Post não encontrado");
     }
 
-    return result.rows[0];
+    return post;
   } catch (error) {
     throw error;
   }

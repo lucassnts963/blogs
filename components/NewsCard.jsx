@@ -1,9 +1,9 @@
 // NewsCard.jsx
 import Link from "next/link";
 
-export function NewsCard({ title, category, image, slug }) {
+export function NewsCard({ title, category, image, slug, blogId }) {
   return (
-    <Link href={`/posts/${slug}`} className="group block h-full">
+    <Link href={`/${blogId}/posts/${slug}`} className="group block h-full">
       <div className="relative h-[200px] md:h-[250px] overflow-hidden rounded-lg shadow-lg">
         <div className="absolute inset-0 w-full h-full transform transition-transform duration-500 group-hover:scale-110">
           <img src={image} alt={title} className="w-full h-full object-cover" />

@@ -132,7 +132,7 @@ export function MarkdownPostCreator({ blogId, categories }) {
         postedAt: new Date().toISOString(),
       };
 
-      const response = await fetch("/api/v1/posts", {
+      const response = await fetch("/api/v1/blogs/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

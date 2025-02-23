@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 
 const categories = [
   "Tecnologia",
@@ -49,6 +50,23 @@ export function BlogTab({ user, blogs, onCreate }) {
       console.error("Erro ao criar blog:", error);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleDeleteBlog(blogId) {
+    try {
+      const response = await fetch(`/api/v1/blogs/${blogId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Falha ao deletar blog");
+
+      setBlogs(blogs.filter((blog) => blog.id !== blogId));
+    } catch (error) {
+      console.error("Erro ao deletar blog:", error);
     }
   }
 
@@ -113,8 +131,9 @@ export function BlogTab({ user, blogs, onCreate }) {
         ) : (
           <div className="space-y-4">
             {blogs.map((blog) => (
-              <div
+              <Link
                 key={blog.uuid}
+                href={`/blogs/${blog.uuid}`}
                 className="flex items-center justify-between p-4 border rounded-lg"
               >
                 <div>
@@ -125,11 +144,14 @@ export function BlogTab({ user, blogs, onCreate }) {
                   <button className="px-3 py-1 border rounded hover:bg-gray-100">
                     Editar
                   </button>
-                  <button className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                  <button
+                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    onClick={() => console.log("hello")}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

@@ -6,6 +6,8 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get("slug");
+    const userId = searchParams.get("userId");
+    const blogId = searchParams.get("blogId");
     const categoryId = searchParams.get("categoryId");
     const search = searchParams.get("search");
     const page = parseInt(searchParams.get("page") || "1");
@@ -20,13 +22,17 @@ export async function GET(request) {
       posts = await Post.findByCategory(categoryId, { limit, offset });
     } else if (search) {
       posts = await Post.search(search, { limit, offset });
+    } else if (userId) {
+      posts = await Post.findAll({ limit, offset, userId });
+    } else if (blogId) {
+      posts = await Post.findAll({ limit, offset, blogId });
     } else {
       posts = await Post.findAll({ limit, offset });
     }
 
     return NextResponse.json(posts);
   } catch (error) {
-    console.error("Error in GET /api/posts:", error);
+    console.error("Error in GET /api/v1/blogs/posts:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

@@ -9,7 +9,7 @@ import Post from "models/post";
 import { formatDate } from "lib/utils";
 
 async function getPost(slug) {
-  const post = await Post.findBySlug(slug);
+  const post = await Post.findOneBySlug(slug);
 
   if (!post) {
     notFound();

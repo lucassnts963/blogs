@@ -1,40 +1,27 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 
 import { MarkdownPostCreator } from "components/MarkdownPostCreator";
 
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 
-function getCategories() {
-  return [
-    "Cidades",
-    "Política",
-    "Brasil",
-    "Economia",
-    "Mundo",
-    "Diversão e Arte",
-    "Ciência e Saúde",
-    "Eu Estudante",
-    "Concursos",
-    "Direitos e Justiça",
-    "Publicidade Legal",
-    "Classificados",
-    "Polícia",
-  ];
+async function fetchCategories() {
+  const response = await fetch("/api/v1/categorias");
+  const categorias = await response.json();
+  return categorias;
 }
 
 export function PostTab({ blogs }) {
   const [loading, setLoading] = useState(false);
   const [blogId, setBlogId] = useState(blogs ? blogs[0].uuid : "");
+  const [categorias, setCategories] = useState([]);
 
-  const [newPost, setNewPost] = useState({
-    blogId: "",
-    title: "",
-    content: "",
-    category: "",
-    image: null,
-    status: "draft",
-  });
+  useEffect(() => {
+    setLoading(true);
+    fetchCategories()
+      .then((result) => setCategories(result))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="bg-white rounded-lg p-6 border">
@@ -54,8 +41,14 @@ export function PostTab({ blogs }) {
         </select>
       </div>
       {blogId !== "" && (
-        <Suspense fallback={<div>Carregando...</div>}>
-          <MarkdownPostCreator blogId={blogId} categories={getCategories()} />
+        <Suspense
+          fallback={
+            <div>
+              <Loader2 className="animate-spin mr-2" size={20} /> Carregando...
+            </div>
+          }
+        >
+          <MarkdownPostCreator blogId={blogId} categories={categorias} />
         </Suspense>
       )}
     </div>

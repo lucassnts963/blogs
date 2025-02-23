@@ -1,140 +1,96 @@
-import { HorizontalNewsCard, NewsCard } from "components/NewsCard";
-import { Slide } from "components/Slide";
-import { extractFirstImagefromMarkdown } from "lib/utils";
-import Post from "models/post";
-import { notFound } from "next/navigation";
+import React from "react";
+import Link from "next/link";
+import { ArrowRight, BookOpen, Users, Layout } from "lucide-react";
 
-async function getNews() {
-  try {
-    const posts = await Post.findAll({
-      blogId: "7848c6a6-ee92-40c6-950e-2700418dba6d",
-    });
-
-    if (!posts || posts.length === 0) {
-      return [];
-    }
-
-    return posts;
-  } catch (error) {
-    console.error("Failed to fetch news:", error);
-    return [];
-  }
-}
-
-// HomePage.jsx
-export default async function HomePage() {
-  const news = await getNews();
-
+export default function LandingPage() {
   return (
-    <main className="container mx-auto px-4 py-6">
-      {/* PUBLICIDADE */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Publicidade</h2>
-        <div className="bg-gray-200 h-32 md:h-40 flex items-center justify-center rounded-lg shadow-md">
-          <p className="text-gray-600">Espaço para banners publicitários</p>
-        </div>
-      </section>
-
-      {/* DESTAQUES */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Destaques</h2>
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="w-full lg:w-2/3">
-            <div className="h-[400px] md:h-[500px] lg:h-[600px] rounded-lg overflow-hidden">
-              <Slide slides={news.slice(0, 3)} />
+    <div className="min-h-screen bg-white">
+      {/* Header/Nav */}
+      <nav className="border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <div className="text-xl font-bold">BlogService</div>
+            <div className="flex gap-4">
+              <Link href="/blogs" className="text-gray-600 hover:text-gray-900">
+                Blogs
+              </Link>
+              <Link
+                href="/autenticacao/login"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Login
+              </Link>
             </div>
           </div>
+        </div>
+      </nav>
 
-          <div className="w-full lg:w-1/3">
-            <div className="flex flex-col gap-6">{buildDestaques(news)}</div>
+      {/* Hero Section */}
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+              Seu espaço para compartilhar ideias
+            </h1>
+            <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+              Crie, compartilhe e conecte-se com leitores através do seu próprio
+              blog personalizado.
+            </p>
+            <div className="mt-5 max-w-md mx-auto flex justify-center">
+              <Link
+                href="/autenticacao/cadastro"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Começar agora
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </div>
           </div>
         </div>
-      </section>
-
-      {/* CATEGORIAS */}
-      <div className="grid grid-cols-1 gap-12">
-        {[
-          "Cidades",
-          "Política",
-          "Brasil",
-          "Economia",
-          "Mundo",
-          "Diversão e Arte",
-          "Ciência e Saúde",
-          "Eu Estudante",
-          "Concursos",
-          "Direitos e Justiça",
-          "Publicidade Legal",
-          "Classificados",
-          "Polícia",
-        ].map((category) => (
-          <section key={category}>
-            <h2 className="text-2xl font-bold mb-6">{category}</h2>
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="w-full lg:w-1/2">
-                <div className="h-[400px] rounded-lg overflow-hidden">
-                  <Slide
-                    slides={news
-                      .filter((item) => item.category === category)
-                      .slice(0, 3)}
-                  />
-                </div>
-              </div>
-              <div className="w-full lg:w-1/2">
-                {buildNewsByCategory(news, category)}
-              </div>
-            </div>
-          </section>
-        ))}
       </div>
-    </main>
-  );
-}
 
-function buildDestaques(news) {
-  if (!news?.length) {
-    return (
-      <p className="text-gray-500 text-center p-4">
-        Nenhum destaque disponível no momento.
-      </p>
-    );
-  }
-
-  return news
-    .slice(1, 3)
-    .map((item) => (
-      <NewsCard
-        key={item.id}
-        title={item.title}
-        category={item.category}
-        image={item.imageUrl}
-        slug={item.slug}
-      />
-    ));
-}
-
-function buildNewsByCategory(news, category) {
-  const filteredNews = news.filter((item) => item.category === category);
-
-  if (!filteredNews?.length) {
-    return (
-      <p className="text-gray-500 text-center p-4">
-        Nenhuma notícia disponível nesta categoria.
-      </p>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {filteredNews.slice(0, 3).map((item) => (
-        <HorizontalNewsCard
-          key={item.id}
-          title={item.title}
-          category={item.category}
-          image={item.imageUrl}
-          slug={`/post/${item.slug}`}
-        />
-      ))}
+      {/* Features Section */}
+      <div className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <BookOpen className="h-6 w-6 text-blue-600" />
+                <h3 className="ml-2 text-lg font-medium">
+                  Publique com facilidade
+                </h3>
+              </div>
+              <p className="mt-4 text-gray-500">
+                Editor intuitivo que permite criar e publicar conteúdo
+                rapidamente
+              </p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <Layout className="h-6 w-6 text-blue-600" />
+                <h3 className="ml-2 text-lg font-medium">
+                  Design personalizável <strong>(em breve)</strong>
+                </h3>
+              </div>
+              <p className="mt-4 text-gray-500">
+                Personalize o layout do seu blog para refletir seu estilo único
+              </p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <Users className="h-6 w-6 text-blue-600" />
+                <h3 className="ml-2 text-lg font-medium">
+                  Construa sua audiência
+                </h3>
+              </div>
+              <p className="mt-4 text-gray-500">
+                Ferramentas para crescer e engajar com sua comunidade de
+                leitores
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

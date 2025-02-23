@@ -6,19 +6,52 @@ async function main() {
 
   await prisma.category.createMany({
     data: [
-      { description: "Cidades" },
-      { description: "Política" },
-      { description: "Brasil" },
-      { description: "Economia" },
-      { description: "Mundo" },
-      { description: "Diversão e Arte" },
-      { description: "Ciência e Saúde" },
-      { description: "Eu Estudante" },
-      { description: "Concursos" },
-      { description: "Direitos e Justiça" },
-      { description: "Publicidade Legal" },
-      { description: "Classificados" },
-      { description: "Polícia" },
+      {
+        description: "Cidades",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
+      {
+        description: "Política",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
+      { description: "Brasil", blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8" },
+      {
+        description: "Economia",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
+      { description: "Mundo", blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8" },
+      {
+        description: "Diversão e Arte",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
+      {
+        description: "Ciência e Saúde",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
+      {
+        description: "Eu Estudante",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
+      {
+        description: "Concursos",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
+      {
+        description: "Direitos e Justiça",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
+      {
+        description: "Publicidade Legal",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
+      {
+        description: "Classificados",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
+      {
+        description: "Polícia",
+        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+      },
     ],
   });
 
