@@ -46,8 +46,8 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contato</h3>
             <div className="space-y-2 text-sm text-gray-300">
-              <p>Email: contato@nordesteparaense.com.br</p>
-              <p>Telefone: (91) 9999-9999</p>
+              <p>Email: onordesteparaense@gmail.com</p>
+              <p>Telefone: (91) 98326-5265</p>
             </div>
           </div>
         </div>
