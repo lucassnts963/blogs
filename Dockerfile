@@ -32,9 +32,6 @@ COPY --from=builder /usr/src/app/entrypoint.sh ./entrypoint.sh
 
 RUN chmod +x ./entrypoint.sh
 
-# Instale node-pg-migrate globalmente
-RUN npm install -g node-pg-migrate
-
 # Exponha a porta 3000
 EXPOSE 3000
 
