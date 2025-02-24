@@ -4,44 +4,6 @@ import { ref, uploadBytes, getDownloadURL, listAll } from "firebase/storage";
 import { storage } from "infra/firebase";
 
 export function MediaTab({ media, onUpload }) {
-  async function fetchMedia(userId) {
-    try {
-      const storageImageRef = ref(storage, `images`);
-      const dataImages = await listAll(storageImageRef);
-
-      const images = [];
-      const documents = [];
-
-      for (const item of dataImages.items) {
-        const imageUrl = await getDownloadURL(ref(storageImageRef, item.name));
-        images.push({
-          name: item.name,
-          url: imageUrl,
-        });
-      }
-
-      const storageDocumentRef = ref(storage, `documents`);
-      const dataDocuments = await listAll(storageDocumentRef);
-
-      for (const item of dataDocuments.items) {
-        const documentUrl = await getDownloadURL(
-          ref(storageDocumentRef, item.name)
-        );
-        documents.push({
-          name: item.name,
-          url: documentUrl,
-        });
-      }
-
-      onUpload({
-        images,
-        documents,
-      });
-    } catch (error) {
-      console.error("Erro ao buscar mídia:", error);
-    }
-  }
-
   async function handleMediaUpload(e, type) {
     const file = e.target.files[0];
     if (!file) return;
@@ -67,12 +29,12 @@ export function MediaTab({ media, onUpload }) {
       const downloadUrl = await getDownloadURL(snapshot.ref);
 
       if (type === "image") {
-        setMedia((prev) => ({
+        onUpload((prev) => ({
           ...prev,
           images: [...prev.images, data],
         }));
       } else {
-        setMedia((prev) => ({
+        onUpload((prev) => ({
           ...prev,
           documents: [...prev.documents, data],
         }));
@@ -108,23 +70,6 @@ export function MediaTab({ media, onUpload }) {
       console.error("Erro ao deletar mídia:", error);
     }
   }
-
-  useEffect(() => {
-    function checkAuth() {
-      const token = localStorage.getItem("token");
-      const userStr = localStorage.getItem("user");
-      const userData = JSON.parse(userStr);
-
-      if (!token || !userStr) {
-        window.location.href = "/autenticacao/login";
-        return;
-      }
-
-      fetchMedia(userData.id);
-    }
-
-    checkAuth();
-  }, []);
 
   return (
     <div className="grid gap-4 md:grid-cols-2">

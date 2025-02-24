@@ -2,8 +2,11 @@ import { HorizontalNewsCard, NewsCard } from "components/NewsCard";
 import { Slide } from "components/Slide";
 import Post from "models/post";
 import Category from "models/category";
+import Blog from "models/blog";
 import { Header } from "../_components/Header";
 import { Footer } from "../_components/Footer";
+import database from "infra/database";
+import { AdSlide } from "../_components/AdSlide";
 
 async function getNews(blogId) {
   try {
@@ -25,6 +28,20 @@ async function getCategorias(blogId) {
   }
 }
 
+async function getUserId(blogId) {
+  const blogs = await Blog.findAll();
+  const blog = blogs.filter((b) => b.uuid === blogId)[0];
+  const userId = blog.userId;
+  return userId;
+}
+
+async function getAds(blogId) {
+  const userId = "40f72fae-1dcc-44ae-95da-3813f934a5f9";
+  const ads = database.prisma.ad.findMany();
+
+  return ads;
+}
+
 export const metadata = {
   title: "Jornal o Nordeste Paraense",
   description:
@@ -33,9 +50,10 @@ export const metadata = {
 
 export default async function BlogHomePage({ params }) {
   const blogId = params.uuid;
-  const [news, categories] = await Promise.all([
+  const [news, categories, ads] = await Promise.all([
     getNews(blogId),
     getCategorias(blogId),
+    getAds(blogId),
   ]);
 
   return (
@@ -44,9 +62,13 @@ export default async function BlogHomePage({ params }) {
       <main className="container mx-auto px-4 py-6">
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Publicidade</h2>
-          <div className="bg-gray-200 h-32 md:h-40 flex items-center justify-center rounded-lg shadow-md">
-            <p className="text-gray-600">Espaço para banners publicitários</p>
-          </div>
+          {ads.length > 0 ? (
+            <AdSlide type="FOOTER" width={1200} height={200} blogId={blogId} />
+          ) : (
+            <div className="bg-gray-200 h-32 md:h-40 flex items-center justify-center rounded-lg shadow-md">
+              <p className="text-gray-600">Nenhum anúncio disponível</p>
+            </div>
+          )}
         </section>
 
         <section className="mb-12">

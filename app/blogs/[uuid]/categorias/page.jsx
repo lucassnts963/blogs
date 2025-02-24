@@ -3,6 +3,7 @@ import Category from "models/category";
 import Post from "models/post";
 import { Header } from "app/blogs/_components/Header";
 import { Footer } from "app/blogs/_components/Footer";
+import { AdSlide } from "app/blogs/_components/AdSlide";
 
 async function getCategory(blogId, description) {
   const categories = await Category.findAll({ blogId });
@@ -67,9 +68,7 @@ export default async function CategoryPage({ params, searchParams }) {
         {/* PUBLICIDADE */}
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Publicidade</h2>
-          <div className="bg-gray-200 h-32 flex items-center justify-center rounded">
-            <p>Espaço para banners publicitários</p>
-          </div>
+          <AdSlide blogId={blogId} width={1200} height={200} type="FOOTER" />
         </section>
 
         {/* Breadcrumb */}
@@ -114,7 +113,7 @@ export default async function CategoryPage({ params, searchParams }) {
             )}
           </div>
 
-          {/* Últimas 5 Notícias Gerais */}
+          {/* Sidebar com últimas notícias e anúncio */}
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold">Últimas Notícias Gerais</h2>
             {posts.slice(0, 4).map((news) => (
@@ -136,6 +135,19 @@ export default async function CategoryPage({ params, searchParams }) {
               <Link href="/noticias" className="text-orange-500 font-semibold">
                 Ver mais
               </Link>
+            </div>
+
+            {/* Espaço para Anúncio na Sidebar */}
+            <div className="bg-gray-100 p-4 rounded-lg shadow-lg">
+              <h2 className="text-lg font-semibold mb-2 text-center">
+                Publicidade
+              </h2>
+              <AdSlide
+                blogId={blogId}
+                width={300}
+                height={600}
+                type="SIDEBAR"
+              />
             </div>
           </div>
         </div>

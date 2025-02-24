@@ -19,6 +19,8 @@ model User {
   password String @default("123456789")
   blogs    Blog[]
   likes    Like[]
+
+  Ad Ad[]
 }
 
 model Category {
@@ -66,4 +68,20 @@ model Like {
   userId String
   post   Post     @relation(fields: [postId], references: [uuid], onDelete: Cascade)
   postId String
+}
+
+model Ad {
+  uuid     String @id @default(uuid())
+  imageUrl String
+  user     User   @relation(fields: [userId], references: [uuid])
+  userId   String
+  type     AdType
+}
+
+enum AdType {
+  BANNER
+  SIDEBAR
+  FOOTER
+  POPUP
+  INLINE
 }
