@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Category from "models/category";
 import Post from "models/post";
-import { Header } from "app/blogs/_components/Header";
-import { Footer } from "app/blogs/_components/Footer";
-import { AdSlide } from "app/blogs/_components/AdSlide";
+import { Header } from "app/_components/Header";
+import { AdSlide } from "app/_components/AdSlide";
+import { Footer } from "app/_components/Footer";
 
 async function getCategory(blogId, description) {
   const categories = await Category.findAll({ blogId });
@@ -77,7 +77,7 @@ export default async function CategoryPage({ params, searchParams }) {
             Home
           </Link>{" "}
           &gt;
-          <Link href="/noticias" className="text-orange-500">
+          <Link href="/" className="text-orange-500">
             Notícias
           </Link>{" "}
           &gt;
@@ -95,7 +95,7 @@ export default async function CategoryPage({ params, searchParams }) {
                 <Link
                   key={news.uuid}
                   className="bg-white shadow-lg rounded-lg p-4"
-                  href={`/blogs/${blogId}/posts/${news.slug}`}
+                  href={`/posts/${news.slug}`}
                 >
                   <img
                     src={news.imageUrl}

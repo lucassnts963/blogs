@@ -5,10 +5,10 @@ import { remark } from "remark";
 import html from "remark-html";
 import Post from "models/post";
 import { formatDate } from "lib/utils";
-import { Header } from "app/blogs/_components/Header";
+import { Header } from "app/_components/Header";
 import Category from "models/category";
-import { Footer } from "app/blogs/_components/Footer";
-import { AdSlide } from "app/blogs/_components/AdSlide";
+import { Footer } from "app/_components/Footer";
+import { AdSlide } from "app/_components/AdSlide";
 
 async function getPost(slug) {
   const post = await Post.findOneBySlug(slug);

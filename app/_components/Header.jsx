@@ -28,7 +28,7 @@ export function Header({ categories, blogId }) {
 
             {/* Social Media */}
             <div className="flex items-center gap-3 px-2 border-l border-orange-600">
-              <a
+              {/* <a
                 href="#"
                 aria-label="Facebook"
                 className="hover:text-orange-200"
@@ -48,7 +48,7 @@ export function Header({ categories, blogId }) {
                 className="hover:text-orange-200"
               >
                 <Instagram size={20} />
-              </a>
+              </a> */}
             </div>
 
             {/* Mobile Search */}
@@ -87,7 +87,7 @@ export function Header({ categories, blogId }) {
           {categories.map((category) => (
             <li key={category.uuid}>
               <Link
-                href={`/blogs/${blogId}/categorias?category=${category.description}`}
+                href={`/categorias?category=${category.description}`}
                 className="hover:text-orange-200 transition-colors whitespace-nowrap"
               >
                 {category.description}

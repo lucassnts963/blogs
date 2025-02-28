@@ -1,96 +1,173 @@
-import React from "react";
-import Link from "next/link";
-import { ArrowRight, BookOpen, Users, Layout } from "lucide-react";
+import { HorizontalNewsCard, NewsCard } from "components/NewsCard";
+import Post from "models/post";
+import { Slide } from "components/Slide";
+import Category from "models/category";
+import Blog from "models/blog";
+import database from "infra/database";
+import { Header } from "./_components/Header";
+import { AdSlide } from "./_components/AdSlide";
+import { Footer } from "./_components/Footer";
 
-export default function LandingPage() {
+async function getNews(blogId) {
+  try {
+    const posts = await Post.findAll({ blogId });
+    return posts || [];
+  } catch (error) {
+    console.error("Failed to fetch news:", error);
+    return [];
+  }
+}
+
+async function getCategorias(blogId) {
+  try {
+    const categories = await Category.findAll({ blogId });
+    return categories || [];
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    return [];
+  }
+}
+
+async function getUserId(blogId) {
+  const blogs = await Blog.findAll();
+  const blog = blogs.filter((b) => b.uuid === blogId)[0];
+  const userId = blog.userId;
+  return userId;
+}
+
+async function getAds(blogId) {
+  const userId = "40f72fae-1dcc-44ae-95da-3813f934a5f9";
+  const ads = database.prisma.ad.findMany();
+
+  return ads;
+}
+
+export const metadata = {
+  title: "Jornal o Nordeste Paraense",
+  description:
+    "Jornal o Nordeste Paraense - Portal de notícias completo com as últimas atualizações.",
+};
+
+export default async function BlogHomePage({ params }) {
+  const blogId = params.uuid;
+  const [news, categories, ads] = await Promise.all([
+    getNews(blogId),
+    getCategorias(blogId),
+    getAds(blogId),
+  ]);
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header/Nav */}
-      <nav className="border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="text-xl font-bold">BlogService</div>
-            <div className="flex gap-4">
-              <Link href="/blogs" className="text-gray-600 hover:text-gray-900">
-                Blogs
-              </Link>
-              <Link
-                href="/autenticacao/login"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Login
-              </Link>
+    <>
+      <Header categories={categories} blogId={blogId} />
+      <main className="container mx-auto px-4 py-6">
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Publicidade</h2>
+          {ads.length > 0 ? (
+            <AdSlide type="FOOTER" width={1200} height={200} blogId={blogId} />
+          ) : (
+            <div className="bg-gray-200 h-32 md:h-40 flex items-center justify-center rounded-lg shadow-md">
+              <p className="text-gray-600">Nenhum anúncio disponível</p>
             </div>
-          </div>
-        </div>
-      </nav>
+          )}
+        </section>
 
-      {/* Hero Section */}
-      <div className="bg-white">
-        <div className="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-              Seu espaço para compartilhar ideias
-            </h1>
-            <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-              Crie, compartilhe e conecte-se com leitores através do seu próprio
-              blog personalizado.
-            </p>
-            <div className="mt-5 max-w-md mx-auto flex justify-center">
-              <Link
-                href="/autenticacao/cadastro"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Começar agora
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Destaques</h2>
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="w-full lg:w-2/3">
+              <div className="h-[400px] md:h-[500px] lg:h-[600px] rounded-lg overflow-hidden">
+                <Slide slides={news.slice(0, 3)} />
+              </div>
+            </div>
+            <div className="w-full lg:w-1/3">
+              <div className="flex flex-col gap-6">
+                {buildDestaques(news, blogId)}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Features Section */}
-      <div className="bg-gray-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <BookOpen className="h-6 w-6 text-blue-600" />
-                <h3 className="ml-2 text-lg font-medium">
-                  Publique com facilidade
-                </h3>
+        <div className="grid grid-cols-1 gap-12">
+          {categories.map((category) => (
+            <section key={category.uuid}>
+              <h2 className="text-2xl font-bold mb-6">
+                {category.description}
+              </h2>
+              <div className="flex flex-col lg:flex-row gap-6">
+                <div className="w-full lg:w-1/2">
+                  <div className="h-[400px] rounded-lg overflow-hidden">
+                    <Slide
+                      slides={news
+                        .filter(
+                          (item) =>
+                            item.category?.description.toLowerCase() ===
+                            category.description.toLowerCase()
+                        )
+                        .slice(0, 3)}
+                    />
+                  </div>
+                </div>
+                <div className="w-full lg:w-1/2">
+                  {buildNewsByCategory(news, category, blogId)}
+                </div>
               </div>
-              <p className="mt-4 text-gray-500">
-                Editor intuitivo que permite criar e publicar conteúdo
-                rapidamente
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <Layout className="h-6 w-6 text-blue-600" />
-                <h3 className="ml-2 text-lg font-medium">
-                  Design personalizável <strong>(em breve)</strong>
-                </h3>
-              </div>
-              <p className="mt-4 text-gray-500">
-                Personalize o layout do seu blog para refletir seu estilo único
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <Users className="h-6 w-6 text-blue-600" />
-                <h3 className="ml-2 text-lg font-medium">
-                  Construa sua audiência
-                </h3>
-              </div>
-              <p className="mt-4 text-gray-500">
-                Ferramentas para crescer e engajar com sua comunidade de
-                leitores
-              </p>
-            </div>
-          </div>
+            </section>
+          ))}
         </div>
-      </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function buildDestaques(news, blogId) {
+  if (!news.length) {
+    return (
+      <p className="text-gray-500 text-center p-4">
+        Nenhum destaque disponível no momento.
+      </p>
+    );
+  }
+  return news
+    .slice(1, 3) // Mantém a lógica do slice, mas já garantimos que há notícias
+    .map((item) => (
+      <NewsCard
+        key={item.uuid}
+        blogId={blogId}
+        title={item.title}
+        category={item.category.description}
+        image={item.imageUrl}
+        slug={item.slug}
+      />
+    ));
+}
+
+function buildNewsByCategory(news, category, blogId) {
+  const filteredNews = news.filter(
+    (item) =>
+      item.category?.description.toLowerCase() ===
+      category.description.toLowerCase()
+  );
+
+  if (!filteredNews.length) {
+    return (
+      <p className="text-gray-500 text-center p-4">
+        Nenhuma notícia disponível nesta categoria.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {filteredNews.slice(0, 3).map((item) => (
+        <HorizontalNewsCard
+          key={item.uuid} // Altere de item.id para item.uuid para garantir unicidade
+          title={item.title}
+          category={item.category.description}
+          image={item.imageUrl}
+          slug={`/posts/${item.slug}`}
+        />
+      ))}
     </div>
   );
 }
