@@ -27,7 +27,6 @@ async function findAll({ blogId }) {
     const prisma = database.prisma;
 
     const categories = await prisma.category.findMany({
-      where: { blogId },
       select: { uuid: true, description: true },
     });
 

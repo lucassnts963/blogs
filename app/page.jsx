@@ -7,6 +7,7 @@ import database from "infra/database";
 import { Header } from "./_components/Header";
 import { AdSlide } from "./_components/AdSlide";
 import { Footer } from "./_components/Footer";
+import { readUUIDFile } from "lib/utils";
 
 async function getNews(blogId) {
   try {
@@ -28,15 +29,7 @@ async function getCategorias(blogId) {
   }
 }
 
-async function getUserId(blogId) {
-  const blogs = await Blog.findAll();
-  const blog = blogs.filter((b) => b.uuid === blogId)[0];
-  const userId = blog.userId;
-  return userId;
-}
-
-async function getAds(blogId) {
-  const userId = "40f72fae-1dcc-44ae-95da-3813f934a5f9";
+async function getAds() {
   const ads = database.prisma.ad.findMany();
 
   return ads;
@@ -48,8 +41,8 @@ export const metadata = {
     "Jornal o Nordeste Paraense - Portal de notícias completo com as últimas atualizações.",
 };
 
-export default async function BlogHomePage({ params }) {
-  const blogId = params.uuid;
+export default async function BlogHomePage() {
+  const blogId = readUUIDFile();
   const [news, categories, ads] = await Promise.all([
     getNews(blogId),
     getCategorias(blogId),

@@ -1,56 +1,85 @@
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcrypt");
+const fs = require("fs");
+const path = require("path");
+
 const prisma = new PrismaClient();
 
+function createUUIDFile(uuid, filename = "uuid.txt") {
+  const filePath = path.join(__dirname, filename);
+  fs.writeFileSync(filePath, uuid, "utf8");
+  console.log(`Arquivo ${filename} criado com UUID: ${uuid}`);
+}
+
 async function main() {
-  console.log("Seeding the database...");
+  const hashedPassword = await bcrypt.hash("123456789", 10);
+
+  var user = await prisma.user.create({
+    data: {
+      email: "onordesteparaense@gmail.com",
+      password: hashedPassword,
+      username: "admin",
+      type: "master",
+    },
+  });
+
+  var blog = await prisma.blog.create({
+    data: {
+      name: "O Nordeste Paraense",
+      category: "Notícias",
+      userId: user.uuid,
+    },
+  });
+
+  createUUIDFile(blog.uuid, path.join("..", "..", "public", "uuid.txt"));
 
   await prisma.category.createMany({
     data: [
       {
         description: "Cidades",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
       {
         description: "Política",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
-      { description: "Brasil", blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8" },
+      { description: "Brasil", blogId: blog.uuid },
       {
         description: "Economia",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
-      { description: "Mundo", blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8" },
+      { description: "Mundo", blogId: blog.uuid },
       {
         description: "Diversão e Arte",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
       {
         description: "Ciência e Saúde",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
       {
         description: "Eu Estudante",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
       {
         description: "Concursos",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
       {
         description: "Direitos e Justiça",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
       {
         description: "Publicidade Legal",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
       {
         description: "Classificados",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
       {
         description: "Polícia",
-        blogId: "e3df6c7f-bcf7-4a0d-a7cb-136b7630d8a8",
+        blogId: blog.uuid,
       },
     ],
   });

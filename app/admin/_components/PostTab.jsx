@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { MarkdownPostCreator } from "components/MarkdownPostCreator";
 
 import { Loader2, Plus } from "lucide-react";
+import { readUUIDFile } from "lib/utils";
 
 async function fetchCategories() {
   const response = await fetch("/api/v1/categorias");
@@ -11,9 +12,8 @@ async function fetchCategories() {
   return categorias;
 }
 
-export function PostTab({ blogs }) {
+export function PostTab({ blogId }) {
   const [loading, setLoading] = useState(false);
-  const [blogId, setBlogId] = useState(blogs ? blogs[0].uuid : "");
   const [categorias, setCategories] = useState([]);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export function PostTab({ blogs }) {
   return (
     <div className="bg-white rounded-lg p-6 border">
       <h2 className="text-xl font-semibold mb-4">Criar Nova Postagem</h2>
-      <div>
+      {/* <div>
         <select
           className="w-full p-2 border rounded-lg"
           value={blogId}
@@ -39,7 +39,7 @@ export function PostTab({ blogs }) {
             </option>
           ))}
         </select>
-      </div>
+      </div> */}
       {blogId !== "" && (
         <Suspense
           fallback={

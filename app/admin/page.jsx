@@ -26,13 +26,25 @@ function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [blogs, setBlogs] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [media, setMedia] = useState({
-    images: [],
-    documents: [],
-    ads: [],
-  });
-  const [activeTab, setActiveTab] = useState("blogs");
+  const [media, setMedia] = useState({ images: [], documents: [], ads: [] });
+  const [activeTab, setActiveTab] = useState("posts");
   const [loading, setLoading] = useState(false);
+  const [blogId, setBlogId] = useState(null);
+
+  useEffect(() => {
+    async function fetchBlogId() {
+      try {
+        const response = await fetch("/uuid.txt");
+        if (!response.ok) throw new Error("Erro ao carregar UUID");
+        const text = await response.text();
+        setBlogId(text.trim());
+      } catch (error) {
+        console.error("Erro ao carregar UUID:", error);
+      }
+    }
+
+    fetchBlogId();
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -46,18 +58,19 @@ function AdminDashboard() {
       }
 
       setUser(userData);
-      fetchAllData(userData.id);
+      if (blogId) {
+        fetchAllData(userData.id, blogId);
+      }
     }
-  }, []);
+  }, [blogId]);
 
-  async function fetchAllData(userId) {
+  async function fetchAllData(userId, blogId) {
     setLoading(true);
     try {
       await Promise.all([
-        fetchBlogs(userId),
-        fetchPosts(userId),
+        fetchBlogs(userId, blogId),
+        fetchPosts(userId, blogId),
         fetchMedia(userId),
-        // fetchAds(userId),
       ]);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
@@ -66,16 +79,15 @@ function AdminDashboard() {
     }
   }
 
-  async function fetchBlogs(userId) {
+  async function fetchBlogs(userId, blogId) {
     try {
-      const response = await fetch(`/api/v1/blogs?userId=${userId}`, {
+      const response = await fetch(`/api/v1/blogs/${blogId}?userId=${userId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
       if (!response.ok) throw new Error("Falha ao buscar blogs");
       const data = await response.json();
       setBlogs(data);
@@ -84,94 +96,23 @@ function AdminDashboard() {
     }
   }
 
-  async function fetchPosts(userId) {
+  async function fetchPosts(userId, blogId) {
     try {
-      const response = await fetch(`/api/v1/blogs/posts?userId=${userId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
+      const response = await fetch(
+        `/api/v1/blogs/${blogId}/posts?userId=${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       if (!response.ok) throw new Error("Falha ao buscar posts");
       const data = await response.json();
       setPosts(data);
     } catch (error) {
       console.error("Erro ao buscar posts:", error);
-    }
-  }
-
-  async function fetchMedia(userId) {
-    try {
-      const storageImageRef = ref(storage, `images`);
-      const dataImages = await listAll(storageImageRef);
-
-      const images = [];
-      const documents = [];
-
-      for (const item of dataImages.items) {
-        const imageUrl = await getDownloadURL(ref(storageImageRef, item.name));
-        images.push({
-          name: item.name,
-          url: imageUrl,
-        });
-      }
-
-      const storageDocumentRef = ref(storage, `documents`);
-      const dataDocuments = await listAll(storageDocumentRef);
-
-      for (const item of dataDocuments.items) {
-        const documentUrl = await getDownloadURL(
-          ref(storageDocumentRef, item.name)
-        );
-        documents.push({
-          name: item.name,
-          url: documentUrl,
-        });
-      }
-
-      const response = await fetch("/api/v1/ads", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const adsResult = await response.json();
-
-      const ads = adsResult.map((a) => ({
-        name: a.uuid,
-        url: a.imageUrl,
-        type: a.type,
-      }));
-
-      setMedia({
-        images,
-        documents,
-        ads,
-      });
-    } catch (error) {
-      console.error("Erro ao buscar mídia:", error);
-    }
-  }
-
-  async function fetchAds(userId) {
-    try {
-      const response = await fetch("/api/v1/ads", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const adsResult = await response.json();
-
-      const ads = adsResult.map((a) => ({
-        name: a.uuid,
-        url: a.imageUrl,
-        type: a.type,
-      }));
-
-      setMedia({ ...media, ads: ads });
-    } catch (error) {
-      console.error("Erro ao buscar anúncios:", error);
     }
   }
 
@@ -186,7 +127,6 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center">
             <div>
@@ -195,49 +135,19 @@ function AdminDashboard() {
               </h1>
               <p className="text-sm text-gray-500">Bem-vindo, {user?.email}</p>
             </div>
-            <div>
-              <UserSection />
-            </div>
-          </div>
-
-          {/* Stats Overview */}
-          <div className="grid gap-4 md:grid-cols-3 mt-6">
-            <div className="flex items-center space-x-4 rounded-lg border p-4">
-              <Book className="h-6 w-6 text-blue-500" />
-              <div>
-                <p className="text-sm font-medium">Total de Blogs</p>
-                <p className="text-2xl font-bold">{blogs.length}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4 rounded-lg border p-4">
-              <Layout className="h-6 w-6 text-green-500" />
-              <div>
-                <p className="text-sm font-medium">Total de Posts</p>
-                <p className="text-2xl font-bold">{posts.length}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4 rounded-lg border p-4">
-              <ImageIcon className="h-6 w-6 text-purple-500" />
-              <div>
-                <p className="text-sm font-medium">Arquivos</p>
-                <p className="text-2xl font-bold">
-                  {media.images.length + media.documents.length}
-                </p>
-              </div>
-            </div>
+            <UserSection />
           </div>
         </div>
 
-        {/* Tabs Navigation */}
         <div className="bg-white rounded-lg shadow-sm p-4">
           <div className="flex space-x-2 mb-4">
-            <TabButton
+            {/* <TabButton
               tab="blogs"
               active={activeTab === "blogs"}
               onClick={setActiveTab}
             >
               Blogs
-            </TabButton>
+            </TabButton> */}
             <TabButton
               tab="posts"
               active={activeTab === "posts"}
@@ -261,20 +171,13 @@ function AdminDashboard() {
             </TabButton>
           </div>
 
-          {/* Blogs Content */}
-          {activeTab === "blogs" && (
+          {/* {activeTab === "blogs" && (
             <BlogTab blogs={blogs} user={user} onCreate={setBlogs} />
-          )}
-
-          {/* Posts Content */}
-          {activeTab === "posts" && <PostTab blogs={blogs} />}
-
-          {/* Media Content */}
+          )} */}
+          {activeTab === "posts" && <PostTab blogId={blogId} />}
           {activeTab === "media" && (
             <MediaTab media={media} onUpload={setMedia} />
           )}
-
-          {/* Ad Content */}
           {activeTab === "ad" && (
             <AdTab ads={media.ads} userId={user?.id} onUpload={setMedia} />
           )}
