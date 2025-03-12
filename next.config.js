@@ -13,6 +13,6 @@ module.exports = {
   },
 
   env: {
-    BUILD_MODE: process.env.BUILD_MODE || "false", // Define "false" como padrão
+    SKIP_DB_DURING_BUILD: process.env.SKIP_DB_DURING_BUILD || "false", // Define "false" como padrão
   },
 };
