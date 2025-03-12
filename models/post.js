@@ -36,6 +36,13 @@ async function create({
   categoryId,
   postedAt,
 }) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const post = await database.prisma.post.create({
       data: {
@@ -63,6 +70,13 @@ async function create({
  * @returns {Promise<Post[]>}
  */
 async function findAll({ limit = 10, offset = 0, blogId, userId } = {}) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return [];
+  }
+
   try {
     const where = {};
 
@@ -96,6 +110,13 @@ async function findAll({ limit = 10, offset = 0, blogId, userId } = {}) {
  * @returns {Promise<Post>}
  */
 async function findOneById(uuid) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const post = database.prisma.post.findFirst({
       where: { uuid },
@@ -123,6 +144,13 @@ async function findOneById(uuid) {
  * @returns {Promise<Post>}
  */
 async function findOneBySlug(slug) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const post = database.prisma.post.findFirst({
       where: { slug },
@@ -153,6 +181,13 @@ async function findOneBySlug(slug) {
  * @returns {Promise<Post[]>}
  */
 async function findByCategory(categoryId, { limit = 10, offset = 0 } = {}) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const result = await database.query({
       text: `
@@ -185,6 +220,13 @@ async function findByCategory(categoryId, { limit = 10, offset = 0 } = {}) {
  * @returns {Promise<Post>}
  */
 async function update(uuid, fields) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   const validFields = [
     "title",
     "subtitle",
@@ -236,6 +278,12 @@ async function update(uuid, fields) {
  * @returns {Promise<Post>}
  */
 async function del(uuid) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return;
+  }
   try {
     const result = await database.query({
       text: "DELETE FROM posts WHERE uuid = $1 RETURNING *",

@@ -6,6 +6,13 @@ import database from "infra/database";
  * @returns {Promise<{uuid: string, username: string, email: string, type: "admin" | "user" | "master"}>}
  */
 async function create({ username, email, type, password }) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const user = await database.prisma.user.create({
       data: { username, email, type, password },
@@ -23,6 +30,13 @@ async function create({ username, email, type, password }) {
  * @returns {Promise<{username: string, email: string, type: "admin" | "user" | "master"}[]>}
  */
 async function findAll() {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return [];
+  }
+
   try {
     const users = await database.prisma.user.findMany({
       select: { username: true, email: true, type: true }, // Exclude password from response
@@ -40,6 +54,13 @@ async function findAll() {
  * @returns {Promise<{uuid: string, username: string, email: string, type: "admin" | "user" | "master", password: string}>}
  */
 async function findOneByEmail(email) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return;
+  }
+
   try {
     const user = await database.prisma.user.findUnique({
       where: { email },
@@ -68,6 +89,13 @@ async function findOneByEmail(email) {
  * @returns {Promise<{uuid: string, username: string, email: string, type: "admin" | "user" | "master"}>}
  */
 async function findOnById(id) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const user = await database.prisma.user.findUnique({
       where: { uuid: id },
@@ -90,6 +118,13 @@ async function findOnById(id) {
  * @returns {Promise<{username: string, email: string, type: "admin" | "user" | "master"}>}
  */
 async function findOnByUsername(username) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const user = await database.prisma.user.findUnique({
       where: { username },
@@ -113,6 +148,13 @@ async function findOnByUsername(username) {
  * @returns {Promise<{username: string, email: string, type: "admin" | "user" | "master"}>}
  */
 async function update(id, data) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const user = await database.prisma.user.update({
       where: { uuid: id },
@@ -132,6 +174,13 @@ async function update(id, data) {
  * @returns {Promise<{uuid: string, username: string, email: string, type: "admin" | "user" | "master"}>}
  */
 async function del(id) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return;
+  }
+
   try {
     const user = await database.prisma.user.delete({
       where: { uuid: id },

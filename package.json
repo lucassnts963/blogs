@@ -10,9 +10,10 @@
   },
   "scripts": {
     "start": "next start",
-    "build": "next build",
+    "build": "SKIP_DB_DURING_BUILD=true next build",
     "dev": "next dev",
     "prisma:migration": "prisma migrate dev --schema=./infra/prisma/schema.prisma --name",
+    "prisma:migration:deploy": "prisma migrate deploy --schema=./infra/prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=./infra/prisma/schema.prisma",
     "prisma:generate": "prisma generate --schema=./infra/prisma/schema.prisma",
     "prisma:seed": "prisma db seed --schema=./infra/prisma/schema.prisma",

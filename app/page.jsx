@@ -10,6 +10,13 @@ import { Footer } from "./_components/Footer";
 import { readUUIDFile } from "lib/utils";
 
 async function getNews(blogId) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return [];
+  }
+
   try {
     const posts = await Post.findAll({ blogId });
     return posts || [];
@@ -20,6 +27,13 @@ async function getNews(blogId) {
 }
 
 async function getCategorias(blogId) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return [];
+  }
+
   try {
     const categories = await Category.findAll({ blogId });
     return categories || [];
@@ -30,6 +44,12 @@ async function getCategorias(blogId) {
 }
 
 async function getAds() {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return [];
+  }
   const ads = database.prisma.ad.findMany();
 
   return ads;

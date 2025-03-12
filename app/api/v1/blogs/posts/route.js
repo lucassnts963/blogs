@@ -1,6 +1,7 @@
 // app/api/posts/route.js
 import { NextResponse } from "next/server";
 import Post from "models/post";
+import { revalidatePath } from "next/cache";
 
 export async function GET(request) {
   try {
@@ -45,6 +46,8 @@ export async function POST(request) {
     const body = await request.json();
 
     const post = await Post.create(body);
+
+    revalidatePath("/");
 
     return NextResponse.json(post);
   } catch (error) {

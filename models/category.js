@@ -6,6 +6,13 @@ import database from "infra/database";
  * @returns {Promise<{id: number, uuid: string, description: string, created_at: Date, updated_at: Date}>}
  */
 async function create(description) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const result = await database.query({
       text: "INSERT INTO categories (description) VALUES ($1) RETURNING *",
@@ -23,6 +30,13 @@ async function create(description) {
  * @returns {Promise<{id: number, uuid: string, description: string, created_at: Date, updated_at: Date}[]>}
  */
 async function findAll({ blogId }) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return [];
+  }
+
   try {
     const prisma = database.prisma;
 
@@ -42,6 +56,13 @@ async function findAll({ blogId }) {
  * @returns {Promise<{id: number, uuid: string, description: string, created_at: Date, updated_at: Date}>}
  */
 async function findOneByUuid(uuid) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const result = await database.query({
       text: "SELECT * FROM categories WHERE uuid = $1",
@@ -65,6 +86,13 @@ async function findOneByUuid(uuid) {
  * @returns {Promise<{id: number, uuid: string, description: string, created_at: Date, updated_at: Date}>}
  */
 async function update(uuid, description) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return {};
+  }
+
   try {
     const result = await database.query({
       text: "UPDATE categories SET description = $1, updated_at = current_timestamp WHERE uuid = $2 RETURNING *",
@@ -87,6 +115,13 @@ async function update(uuid, description) {
  * @returns {Promise<void>}
  */
 async function del(uuid) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_DB_DURING_BUILD === "true"
+  ) {
+    return;
+  }
+
   try {
     const result = await database.query({
       text: "DELETE FROM categories WHERE uuid = $1 RETURNING *",
