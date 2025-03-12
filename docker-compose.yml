@@ -15,7 +15,10 @@ services:
     restart: unless-stopped
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        - SKIP_DB_DURING_BUILD=true
     container_name: nextjs_app
     env_file:
       - .env.production

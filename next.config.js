@@ -9,6 +9,10 @@ module.exports = {
         "pg-native": false,
       };
     }
+
+    config.env = {
+      SKIP_DB_DURING_BUILD: process.env.SKIP_DB_DURING_BUILD || "false",
+    };
     return config;
   },
 };
