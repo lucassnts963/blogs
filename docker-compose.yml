@@ -2,37 +2,52 @@ services:
   db:
     image: postgres:latest
     container_name: postgres_container
-    environment:
-      POSTGRES_USER: seu_usuario
-      POSTGRES_PASSWORD: sua_senha
-      POSTGRES_DB: seu_banco_de_dados
+    env_file:
+      - .env.production
+    # environment:
+    #   POSTGRES_USER: seu_usuario
+    #   POSTGRES_PASSWORD: sua_senha
+    #   POSTGRES_DB: seu_banco_de_dados
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
       - app-network
+    restart: unless-stopped
 
   app:
     build: .
     container_name: nextjs_app
-    environment:
-      NODE_ENV: production,
-      POSTGRES_HOST: db,
-      POSTGRES_PORT: 5432,
-      POSTGRES_USER: seu_usuario,
-      POSTGRES_DB: seu_banco_de_dados,
-      POSTGRES_PASSWORD: sua_senha,
-      DATABASE_URL: postgres://seu_usuario:sua_senha@db:5432/seu_banco_de_dados
-      JWT_SECRET: seu_segredo_jwt,
+    env_file:
+      - .env.production
     ports:
       - "3000:3000"
     depends_on:
       - db
     networks:
       - app-network
+    restart: unless-stopped
+    entrypoint: ["/usr/src/app/entrypoint.sh"]
+
+  prisma-studio:
+    image: node:20
+    container_name: prisma_studio
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    command: npm run prisma:studio
+    ports:
+      - "5555:5555"
+    env_file:
+      - .env.production
+    depends_on:
+      - db
+    networks:
+      - app-network
+    restart: unless-stopped
 
 networks:
   app-network:
     driver: bridge
-entrypoint: ["/usr/src/app/entrypoint.sh"]
+
 volumes:
   pgdata:

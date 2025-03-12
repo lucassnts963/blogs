@@ -3,9 +3,8 @@
 # Rodar as migrações antes de iniciar o app
 echo "Executando migrações..."
 npm run prisma:migration init
-npm run prisma:generate
-npm run prisma:seed
+npm run prisma:migration:deploy
 
 # Iniciar o servidor
 echo "Iniciando o servidor..."
-npm run start
+SKIP_DB_DURING_BUILD=false npm run start
